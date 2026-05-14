@@ -406,12 +406,14 @@ body {
 .birthday-row:hover { background: rgba(16,185,129,0.1); }
 
 .player-rank { color: #4a5568; font-size: 0.78rem; text-align: center; }
-.player-name { color: var(--text-h); font-weight: 600; }
-.player-club { color: #94a3b8; display: flex; align-items: center; gap: 5px; }
-.player-league { font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 5px; }
-.player-nat  { color: #94a3b8; font-size: 0.82rem; }
+.player-name { color: var(--text-h); font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.player-club { color: #94a3b8; display: flex; align-items: center; gap: 5px; min-width: 0; overflow: hidden; }
+.player-league { font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 5px; min-width: 0; overflow: hidden; }
+.player-nat  { color: #94a3b8; font-size: 0.82rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .player-age  { color: var(--text-h); font-weight: 700; text-align: center; }
 .player-born { color: #64748b; font-size: 0.78rem; }
+
+.cell-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 
 .club-logo,
 .league-logo {

@@ -107,11 +107,11 @@ export default function Results({ result, onReset }) {
                     <span className="player-name">{p.name}</span>
                     <span className="player-club">
                       {p.crest && <img src={p.crest} alt="" className="club-logo" />}
-                      {p.club}
+                      <span className="cell-text">{p.club}</span>
                     </span>
                     <span className="player-league" style={{ color }}>
                       {p.leagueLogo && <img src={p.leagueLogo} alt="" className="league-logo" />}
-                      {p.league}
+                      <span className="cell-text">{p.league}</span>
                     </span>
                     <span className="player-nat">{p.nationality}</span>
                     <span className="player-age">{playerAge(p.birth)}</span>
