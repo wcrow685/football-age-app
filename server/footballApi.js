@@ -120,7 +120,7 @@ export async function fetchApiSportsLeague(apiKey, leagueId, leagueName, season)
   let page = 1;
   let totalPages = 1;
 
-  while (page <= totalPages && page <= 15) {
+  while (page <= totalPages && page <= 3) {
     const url = `${APISPORTS_URL}/players?league=${leagueId}&season=${season}&page=${page}`;
     const res = await fetch(url, { headers: { "x-apisports-key": apiKey } });
     if (!res.ok) throw new Error(`api-sports.io error ${res.status} for league ${leagueId}`);
