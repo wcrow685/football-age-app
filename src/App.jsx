@@ -20,6 +20,7 @@ export default function App() {
   const [year, setYear]     = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingSlow, setLoadingSlow] = useState(false);
   const [error, setError]   = useState(null);
   const [totalPlayers, setTotalPlayers] = useState("...");
 
@@ -40,10 +41,17 @@ export default function App() {
     if (!day || !month || !year) return;
 
     setLoading(true);
+    setLoadingSlow(false);
     setError(null);
 
+    const slowTimer = setTimeout(() => setLoadingSlow(true), 5000);
+
     try {
-      const res = await fetch(`${API_URL}/api/players`);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 60000);
+
+      const res = await fetch(`${API_URL}/api/players`, { signal: controller.signal });
+      clearTimeout(timeout);
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const { players, total } = await res.json();
 
@@ -100,9 +108,15 @@ export default function App() {
         percentileOlderThan: Math.round((younger / total) * 100),
       });
     } catch (err) {
-      setError(err.message);
+      if (err.name === "AbortError") {
+        setError("Server is taking too long to respond. Please try again in a moment.");
+      } else {
+        setError(err.message);
+      }
     } finally {
+      clearTimeout(slowTimer);
       setLoading(false);
+      setLoadingSlow(false);
     }
   }
 
@@ -150,6 +164,11 @@ export default function App() {
               <button type="submit" className="btn-primary" disabled={loading}>
                 {loading ? <span className="spinner" /> : "Compare Me →"}
               </button>
+              {loadingSlow && (
+                <p className="hint" style={{color: "#94a3b8", marginTop: 8}}>
+                  Server is waking up, please wait a moment...
+                </p>
+              )}
             </form>
             <p className="hint">
               Based on {totalPlayers} active players from Premier League, La Liga,
