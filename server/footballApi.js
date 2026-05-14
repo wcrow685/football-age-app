@@ -113,6 +113,62 @@ export const APISPORTS_LEAGUES = [
   { id: 307, name: "Saudi Pro League", season: 2024 },
 ];
 
+// Fetch by team-by-team to work around free plan's 3-page league limit
+export async function fetchApiSportsLeagueByTeam(apiKey, leagueId, leagueName, season) {
+  const APISPORTS_URL = "https://v3.football.api-sports.io";
+  const leagueLogo = LEAGUE_LOGOS[leagueName] || "";
+
+  // Step 1: get all teams in the league
+  const teamsRes = await fetch(`${APISPORTS_URL}/teams?league=${leagueId}&season=${season}`, {
+    headers: { "x-apisports-key": apiKey },
+  });
+  const teamsData = await teamsRes.json();
+  const teams = teamsData.response || [];
+  console.log(`  ${leagueName}: ${teams.length} teams found`);
+
+  const seen = new Set();
+  const players = [];
+
+  for (let t = 0; t < teams.length; t++) {
+    const team = teams[t].team;
+    let page = 1;
+    let totalPages = 1;
+
+    while (page <= totalPages && page <= 3) {
+      const url = `${APISPORTS_URL}/players?team=${team.id}&season=${season}&page=${page}`;
+      const res = await fetch(url, { headers: { "x-apisports-key": apiKey } });
+      if (!res.ok) break;
+      const data = await res.json();
+      if (data.errors && Object.keys(data.errors).length > 0) break;
+      totalPages = data.paging?.total ?? 1;
+
+      (data.response || []).forEach(item => {
+        const p = item.player;
+        if (!p?.birth?.date || seen.has(p.id)) return;
+        seen.add(p.id);
+        players.push({
+          name:        p.name,
+          birth:       p.birth.date.slice(0, 10),
+          league:      leagueName,
+          leagueLogo,
+          nationality: p.nationality || "Unknown",
+          club:        team.name,
+          crest:       team.logo || "",
+          position:    item.statistics?.[0]?.games?.position || "",
+        });
+      });
+
+      page++;
+      if (page <= totalPages) await new Promise(r => setTimeout(r, 500));
+    }
+
+    // Small delay between teams to avoid rate limit
+    if (t < teams.length - 1) await new Promise(r => setTimeout(r, 1000));
+  }
+
+  return players;
+}
+
 export async function fetchApiSportsLeague(apiKey, leagueId, leagueName, season) {
   const APISPORTS_URL = "https://v3.football.api-sports.io";
   const leagueLogo = LEAGUE_LOGOS[leagueName] || "";
