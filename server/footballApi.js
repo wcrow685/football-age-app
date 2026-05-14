@@ -136,9 +136,20 @@ export async function fetchApiSportsLeagueByTeam(apiKey, leagueId, leagueName, s
 
     while (page <= totalPages && page <= 3) {
       const url = `${APISPORTS_URL}/players?team=${team.id}&season=${season}&page=${page}`;
-      const res = await fetch(url, { headers: { "x-apisports-key": apiKey } });
-      if (!res.ok) break;
-      const data = await res.json();
+      let data = null;
+
+      // Retry up to 3 times on rate limit (429)
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const res = await fetch(url, { headers: { "x-apisports-key": apiKey } });
+        if (res.status === 429) {
+          await new Promise(r => setTimeout(r, 5000 * (attempt + 1)));
+          continue;
+        }
+        if (!res.ok) break;
+        data = await res.json();
+        break;
+      }
+      if (!data) break;
       if (data.errors && Object.keys(data.errors).length > 0) break;
       totalPages = data.paging?.total ?? 1;
 
@@ -159,11 +170,11 @@ export async function fetchApiSportsLeagueByTeam(apiKey, leagueId, leagueName, s
       });
 
       page++;
-      if (page <= totalPages) await new Promise(r => setTimeout(r, 500));
+      if (page <= totalPages) await new Promise(r => setTimeout(r, 1000));
     }
 
-    // Small delay between teams to avoid rate limit
-    if (t < teams.length - 1) await new Promise(r => setTimeout(r, 1000));
+    // Delay between teams
+    if (t < teams.length - 1) await new Promise(r => setTimeout(r, 2000));
   }
 
   return players;
