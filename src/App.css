@@ -509,6 +509,22 @@ footer {
     font-size: 0.95rem;
   }
 
+  /* Player list: hide Nationality and Born on mobile */
+  .player-list-header,
+  .player-row {
+    grid-template-columns: 28px 1.6fr 1.2fr 0.9fr 40px;
+  }
+
+  .player-nat,
+  .player-born,
+  .player-list-header span:nth-child(5),
+  .player-list-header span:nth-child(7) {
+    display: none;
+  }
+
+  .player-list { font-size: 0.78rem; }
+  .player-name { font-size: 0.82rem; }
+
   .league-table-header,
   .league-table-row {
     grid-template-columns: 1fr 60px 80px;
