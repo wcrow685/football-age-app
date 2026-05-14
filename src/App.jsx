@@ -3,6 +3,7 @@ import Results from "./components/Results";
 import "./App.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+const USE_STATIC = import.meta.env.VITE_USE_STATIC !== "false";
 
 const MONTHS = [
   "January","February","March","April","May","June",
@@ -30,10 +31,17 @@ export default function App() {
 
   // Fetch total count for the hint text
   useEffect(() => {
-    fetch(`${API_URL}/api/status`)
-      .then(r => r.json())
-      .then(d => { if (d.total) setTotalPlayers(d.total); })
-      .catch(() => {});
+    if (USE_STATIC) {
+      fetch("/players.json")
+        .then(r => r.json())
+        .then(d => { if (d.total) setTotalPlayers(d.total); })
+        .catch(() => {});
+    } else {
+      fetch(`${API_URL}/api/status`)
+        .then(r => r.json())
+        .then(d => { if (d.total) setTotalPlayers(d.total); })
+        .catch(() => {});
+    }
   }, []);
 
   async function handleSubmit(e) {
@@ -47,10 +55,11 @@ export default function App() {
     const slowTimer = setTimeout(() => setLoadingSlow(true), 5000);
 
     try {
+      const url = USE_STATIC ? "/players.json" : `${API_URL}/api/players`;
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 60000);
 
-      const res = await fetch(`${API_URL}/api/players`, { signal: controller.signal });
+      const res = await fetch(url, { signal: controller.signal });
       clearTimeout(timeout);
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const { players, total } = await res.json();
