@@ -497,6 +497,18 @@ footer {
 
 /* ── Responsive ──────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
+  .input-card { padding: 24px 20px; }
+
+  .date-dropdowns {
+    grid-template-columns: 72px 1fr 90px;
+  }
+
+  .date-dropdowns select {
+    padding-left: 10px;
+    padding-right: 28px;
+    font-size: 0.95rem;
+  }
+
   .league-table-header,
   .league-table-row {
     grid-template-columns: 1fr 60px 80px;
