@@ -413,16 +413,12 @@ body {
 .player-age  { color: var(--text-h); font-weight: 700; text-align: center; }
 .player-born { color: #64748b; font-size: 0.78rem; }
 
-.club-logo {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
+.club-logo,
 .league-logo {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  min-width: 16px;
+  max-width: 16px;
+  height: 16px;
   object-fit: contain;
   flex-shrink: 0;
 }
