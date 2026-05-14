@@ -1,5 +1,27 @@
 const BASE_URL = "https://api.football-data.org/v4";
 
+// League logos from api-sports.io public CDN (no auth needed for images)
+export const LEAGUE_LOGOS = {
+  "Premier League": "https://media.api-sports.io/football/leagues/39.png",
+  "La Liga":        "https://media.api-sports.io/football/leagues/140.png",
+  "Bundesliga":     "https://media.api-sports.io/football/leagues/78.png",
+  "Serie A":        "https://media.api-sports.io/football/leagues/135.png",
+  "Ligue 1":        "https://media.api-sports.io/football/leagues/61.png",
+  "Süper Lig":      "https://media.api-sports.io/football/leagues/203.png",
+  "Saudi Pro League": "https://media.api-sports.io/football/leagues/307.png",
+};
+
+// Team crests for static leagues
+const STATIC_CRESTS = {
+  "Galatasaray": "https://media.api-sports.io/football/teams/645.png",
+  "Fenerbahce":  "https://media.api-sports.io/football/teams/611.png",
+  "Besiktas":    "https://media.api-sports.io/football/teams/614.png",
+  "Al-Nassr":    "https://media.api-sports.io/football/teams/2932.png",
+  "Al-Ittihad":  "https://media.api-sports.io/football/teams/2931.png",
+  "Al-Hilal":    "https://media.api-sports.io/football/teams/2930.png",
+  "Al-Ahli":     "https://media.api-sports.io/football/teams/2934.png",
+};
+
 // Leagues available on football-data.org free tier
 export const API_LEAGUES = [
   { code: "PL",  name: "Premier League" },
@@ -63,6 +85,7 @@ export async function fetchLeague(apiKey, leagueCode, leagueName) {
   if (!res.ok) throw new Error(`football-data.org error ${res.status} for ${leagueCode}`);
   const data = await res.json();
 
+  const leagueLogo = LEAGUE_LOGOS[leagueName] || "";
   const players = [];
   (data.teams || []).forEach(team => {
     (team.squad || []).forEach(player => {
@@ -71,8 +94,10 @@ export async function fetchLeague(apiKey, leagueCode, leagueName) {
         name:        player.name,
         birth:       player.dateOfBirth.slice(0, 10),
         league:      leagueName,
+        leagueLogo,
         nationality: player.nationality || "Unknown",
         club:        team.name,
+        crest:       team.crest || "",
         position:    player.position || "",
       });
     });
@@ -90,6 +115,7 @@ export const APISPORTS_LEAGUES = [
 
 export async function fetchApiSportsLeague(apiKey, leagueId, leagueName, season) {
   const APISPORTS_URL = "https://v3.football.api-sports.io";
+  const leagueLogo = LEAGUE_LOGOS[leagueName] || "";
   const players = [];
   let page = 1;
   let totalPages = 1;
@@ -114,8 +140,10 @@ export async function fetchApiSportsLeague(apiKey, leagueId, leagueName, season)
         name:        p.name,
         birth:       p.birth.date.slice(0, 10),
         league:      leagueName,
+        leagueLogo,
         nationality: p.nationality || "Unknown",
         club:        stat?.team?.name || "",
+        crest:       stat?.team?.logo || "",
         position:    stat?.games?.position || "",
       });
     });
@@ -125,4 +153,14 @@ export async function fetchApiSportsLeague(apiKey, leagueId, leagueName, season)
   }
 
   return players;
+}
+
+// Inject crest + leagueLogo into static league players
+export function enrichStaticPlayers(leagueName, players) {
+  const leagueLogo = LEAGUE_LOGOS[leagueName] || "";
+  return players.map(p => ({
+    ...p,
+    leagueLogo,
+    crest: STATIC_CRESTS[p.club] || "",
+  }));
 }

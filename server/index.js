@@ -5,6 +5,7 @@ import {
   API_LEAGUES, STATIC_LEAGUES,
   fetchLeague,
   APISPORTS_LEAGUES, fetchApiSportsLeague,
+  enrichStaticPlayers,
 } from "./footballApi.js";
 import { loadCache, saveCache } from "./cache.js";
 
@@ -33,7 +34,7 @@ async function init() {
   for (const [leagueName, players] of Object.entries(STATIC_LEAGUES)) {
     if (!cache[leagueName]) {
       cache[leagueName] = {
-        players: players.map(p => ({ ...p, league: leagueName })),
+        players: enrichStaticPlayers(leagueName, players.map(p => ({ ...p, league: leagueName }))),
         cachedAt: null,
         source: "static",
       };
