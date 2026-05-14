@@ -105,8 +105,14 @@ export default function Results({ result, onReset }) {
                   <div key={p.name} className="player-row">
                     <span className="player-rank">{i + 1}</span>
                     <span className="player-name">{p.name}</span>
-                    <span className="player-club">{p.club}</span>
-                    <span className="player-league" style={{ color }}>{p.league}</span>
+                    <span className="player-club">
+                      {p.crest && <img src={p.crest} alt="" className="club-logo" />}
+                      {p.club}
+                    </span>
+                    <span className="player-league" style={{ color }}>
+                      {p.leagueLogo && <img src={p.leagueLogo} alt="" className="league-logo" />}
+                      {p.league}
+                    </span>
                     <span className="player-nat">{p.nationality}</span>
                     <span className="player-age">{playerAge(p.birth)}</span>
                     <span className="player-born">{p.birth}</span>
@@ -148,8 +154,14 @@ export default function Results({ result, onReset }) {
                 <div key={p.name + p.birth} className="player-row birthday-row">
                   <span className="player-rank">{i + 1}</span>
                   <span className="player-name">{p.name}</span>
-                  <span className="player-club">{p.club}</span>
-                  <span className="player-league" style={{ color }}>{p.league}</span>
+                  <span className="player-club">
+                    {p.crest && <img src={p.crest} alt="" className="club-logo" />}
+                    {p.club}
+                  </span>
+                  <span className="player-league" style={{ color }}>
+                    {p.leagueLogo && <img src={p.leagueLogo} alt="" className="league-logo" />}
+                    {p.league}
+                  </span>
                   <span className="player-nat">{p.nationality}</span>
                   <span className="player-age">{playerAge(p.birth)}</span>
                   <span className="player-born">{p.birth}</span>

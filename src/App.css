@@ -407,11 +407,25 @@ body {
 
 .player-rank { color: #4a5568; font-size: 0.78rem; text-align: center; }
 .player-name { color: var(--text-h); font-weight: 600; }
-.player-club { color: #94a3b8; }
-.player-league { font-size: 0.78rem; font-weight: 600; }
+.player-club { color: #94a3b8; display: flex; align-items: center; gap: 5px; }
+.player-league { font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 5px; }
 .player-nat  { color: #94a3b8; font-size: 0.82rem; }
 .player-age  { color: var(--text-h); font-weight: 700; text-align: center; }
 .player-born { color: #64748b; font-size: 0.78rem; }
+
+.club-logo {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.league-logo {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
 
 .no-players {
   text-align: center;
