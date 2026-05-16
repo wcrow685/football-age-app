@@ -9,6 +9,7 @@ export const LEAGUE_LOGOS = {
   "Ligue 1":        "https://media.api-sports.io/football/leagues/61.png",
   "Süper Lig":      "https://media.api-sports.io/football/leagues/203.png",
   "Saudi Pro League": "https://media.api-sports.io/football/leagues/307.png",
+  "MLS":            "https://media.api-sports.io/football/leagues/253.png",
 };
 
 // Team crests for static leagues

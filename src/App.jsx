@@ -181,7 +181,7 @@ export default function App() {
             </form>
             <p className="hint">
               Based on {totalPlayers} active players from Premier League, La Liga,
-              Bundesliga, Serie A, Ligue 1, Süper Lig &amp; Saudi Pro League (2024-25 season).
+              Bundesliga, Serie A, Ligue 1, Süper Lig, Saudi Pro League &amp; MLS (2024-25 season).
             </p>
           </div>
         </main>
