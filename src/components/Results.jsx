@@ -12,6 +12,7 @@ const LEAGUE_COLORS = {
   "Ligue 1":          "#8b5cf6",
   "Süper Lig":        "#ec4899",
   "Saudi Pro League": "#14b8a6",
+  "MLS":              "#f97316",
 };
 
 const NAT_COLORS = [
