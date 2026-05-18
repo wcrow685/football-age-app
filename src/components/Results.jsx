@@ -44,7 +44,7 @@ export default function Results({ result, onReset }) {
   const [leagueFilter, setLeagueFilter] = useState("All");
   const [showAll, setShowAll] = useState(false);
 
-  const leagues = ["All", ...Object.keys(LEAGUE_COLORS).sort()];
+  const leagues = ["All", ...byLeague.map(l => l.name).filter(n => LEAGUE_COLORS[n])];
   const filtered = leagueFilter === "All"
     ? olderPlayers
     : olderPlayers.filter(p => p.league === leagueFilter);
