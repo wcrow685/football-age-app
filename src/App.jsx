@@ -10,6 +10,13 @@ const MONTHS = [
   "July","August","September","October","November","December"
 ];
 
+const SHORT_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function formatBirth(birth) {
+  const [y, m, d] = birth.split("-");
+  return `${parseInt(d)} ${SHORT_MONTHS[parseInt(m) - 1]} ${y}`;
+}
+
 function daysInMonth(month, year) {
   return new Date(year, month, 0).getDate();
 }
@@ -251,6 +258,7 @@ export default function App() {
                 <button key={p.name} className="famous-card" onClick={() => handleFamousPlayer(p)} disabled={loading}>
                   <img src={p.photo} alt={p.name} className="famous-photo" onError={e => { e.target.style.display='none'; }} />
                   <span className="famous-name">{p.name}</span>
+                  <span className="famous-birth">🎂 {formatBirth(p.birth)}</span>
                 </button>
               ))}
             </div>
