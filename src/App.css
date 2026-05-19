@@ -78,9 +78,11 @@ body {
 .input-section {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
+  padding: 48px 24px 0;
+  gap: 32px;
 }
 
 .card {
@@ -452,9 +454,9 @@ body {
 
 /* ── Famous players ──────────────────────────────────────────────────── */
 .famous-section {
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 0 24px 48px;
+  width: 100%;
+  max-width: 560px;
+  padding: 0 0 48px;
   text-align: center;
 }
 
