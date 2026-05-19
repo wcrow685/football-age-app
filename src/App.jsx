@@ -206,8 +206,8 @@ export default function App() {
     <div className="app">
       <header className="hero">
         <div className="hero-content">
-          <div className="ball-icon">⚽</div>
-          <h1>How Many Football Players<br />Are Older Than Me?</h1>
+          <div className="ball-icon" style={{ cursor: result ? "pointer" : "default" }} onClick={result ? handleReset : undefined}>⚽</div>
+          <h1 style={{ cursor: result ? "pointer" : "default" }} onClick={result ? handleReset : undefined}>How Many Football Players<br />Are Older Than Me?</h1>
           <p className="subtitle">
             Find out how you compare in age to today's top active football players
             across the world's biggest leagues.
@@ -248,7 +248,7 @@ export default function App() {
             </form>
             <p className="hint">
               Based on {totalPlayers} active players from Premier League, La Liga,
-              Bundesliga, Serie A, Ligue 1, Süper Lig, Saudi Pro League &amp; MLS (2024-25 season).
+              Bundesliga, Serie A, Ligue 1, Süper Lig, Saudi Pro League &amp; MLS (2025-26 season).
             </p>
           </div>
           <div className="famous-section">
