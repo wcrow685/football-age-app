@@ -252,7 +252,7 @@ export default function App() {
             </p>
           </div>
           <div className="famous-section">
-            <p className="famous-label">Or compare with a legend</p>
+            <p className="famous-label">Or compare with a famous player</p>
             <div className="famous-grid">
               {FAMOUS_PLAYERS.map(p => (
                 <button key={p.name} className="famous-card" onClick={() => handleFamousPlayer(p)} disabled={loading}>
