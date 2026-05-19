@@ -483,16 +483,14 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 4px;
+  gap: 6px;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 10px 12px;
+  padding: 12px 10px 10px;
   cursor: pointer;
   transition: border-color 0.2s, transform 0.15s, background 0.2s;
-  width: 100px;
-  min-height: 120px;
+  width: 110px;
 }
 
 .famous-card:hover:not(:disabled) {
@@ -503,6 +501,12 @@ body {
 
 .famous-card:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.famous-avatar-wrap {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
 .famous-photo {
   width: 52px;
   height: 52px;
@@ -510,6 +514,19 @@ body {
   object-fit: cover;
   object-position: top;
   background: var(--border);
+}
+
+.famous-initials {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.02em;
 }
 
 .famous-name {
@@ -524,7 +541,7 @@ body {
   font-size: 0.62rem;
   color: #64748b;
   text-align: center;
-  margin-top: auto;
+  white-space: nowrap;
   line-height: 1.2;
 }
 
