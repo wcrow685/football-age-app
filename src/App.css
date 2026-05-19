@@ -501,33 +501,6 @@ body {
 
 .famous-card:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.famous-avatar-wrap {
-  width: 52px;
-  height: 52px;
-  flex-shrink: 0;
-}
-
-.famous-photo {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  object-fit: cover;
-  object-position: top;
-  background: var(--border);
-}
-
-.famous-initials {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: 700;
-  align-items: center;
-  justify-content: center;
-  letter-spacing: 0.02em;
-}
 
 .famous-name {
   font-size: 0.72rem;

@@ -256,20 +256,6 @@ export default function App() {
             <div className="famous-grid">
               {FAMOUS_PLAYERS.map(p => (
                 <button key={p.name} className="famous-card" onClick={() => handleFamousPlayer(p)} disabled={loading}>
-                  <div className="famous-avatar-wrap">
-                    <img
-                      src={p.photo}
-                      alt={p.name}
-                      className="famous-photo"
-                      onError={e => {
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.nextSibling.style.display = "flex";
-                      }}
-                    />
-                    <div className="famous-initials" style={{ display: "none" }}>
-                      {p.name.split(" ").map(w => w[0]).join("").slice(0, 2)}
-                    </div>
-                  </div>
                   <span className="famous-name">{p.name}</span>
                   <span className="famous-birth">🎂 {formatBirth(p.birth)}</span>
                 </button>
