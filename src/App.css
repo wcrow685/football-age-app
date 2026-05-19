@@ -580,6 +580,24 @@ footer {
 
 /* ── Responsive ──────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
+  .hero {
+    padding: 32px 20px 28px;
+  }
+
+  .ball-icon {
+    font-size: 36px;
+    margin-bottom: 10px;
+  }
+
+  .hero h1 {
+    font-size: 1.55rem;
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    font-size: 0.88rem;
+  }
+
   .input-card { padding: 24px 20px; }
 
   .date-dropdowns {
