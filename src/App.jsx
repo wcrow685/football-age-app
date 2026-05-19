@@ -32,6 +32,8 @@ const FAMOUS_PLAYERS = [
   { name: "Lamine Yamal",      birth: "2007-07-13", photo: "https://img.a.transfermarkt.technology/portrait/medium/987714-1722413524.jpg" },
   { name: "Harry Kane",        birth: "1993-07-28", photo: "https://img.a.transfermarkt.technology/portrait/medium/132098-1715945570.jpg" },
   { name: "Neymar Jr",         birth: "1992-02-05", photo: "https://img.a.transfermarkt.technology/portrait/medium/68290-1715683897.jpg" },
+  { name: "Pedri",             birth: "2002-11-25", photo: "https://img.a.transfermarkt.technology/portrait/medium/553919-1716198882.jpg" },
+  { name: "Rodri",             birth: "1996-06-22", photo: "https://img.a.transfermarkt.technology/portrait/medium/357905-1715683975.jpg" },
 ];
 
 export default function App() {
@@ -268,7 +270,7 @@ export default function App() {
       )}
 
       <footer>
-        <p>Data from API-Football · 2024-25 season · For entertainment purposes only.</p>
+        <p>Data from ESPN · 2025-26 season · For entertainment purposes only.</p>
       </footer>
     </div>
   );
