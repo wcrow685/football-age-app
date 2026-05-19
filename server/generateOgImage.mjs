@@ -36,33 +36,32 @@ for (let y = 0; y < H; y += 80) {
   ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
 }
 
-// Football icon — white circle with black pentagon patches
-const cx = W / 2, cy = 148, r = 52;
+// Football icon
+const cx = W / 2, cy = 145, r = 58;
+// Glow behind ball
+const ballGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 1.8);
+ballGlow.addColorStop(0, "rgba(16,185,129,0.3)");
+ballGlow.addColorStop(1, "rgba(16,185,129,0)");
+ctx.fillStyle = ballGlow;
+ctx.beginPath();
+ctx.arc(cx, cy, r * 1.8, 0, Math.PI * 2);
+ctx.fill();
 // White ball
 ctx.beginPath();
 ctx.arc(cx, cy, r, 0, Math.PI * 2);
-ctx.fillStyle = "#ffffff";
+ctx.fillStyle = "#f0f0f0";
 ctx.fill();
-// Green border
 ctx.strokeStyle = "#10b981";
-ctx.lineWidth = 3;
+ctx.lineWidth = 4;
 ctx.stroke();
-// Pentagon patches
-ctx.fillStyle = "#1a1a2e";
-const patches = [
-  [cx, cy],
-  [cx, cy - 28],
-  [cx + 24, cy - 8],
-  [cx + 15, cy + 22],
-  [cx - 15, cy + 22],
-  [cx - 24, cy - 8],
-];
+// Black pentagon patches
+ctx.fillStyle = "#111827";
+const patches = [[cx, cy], [cx, cy - 32], [cx + 28, cy - 10], [cx + 17, cy + 26], [cx - 17, cy + 26], [cx - 28, cy - 10]];
 patches.forEach(([px, py]) => {
   ctx.beginPath();
-  for (let i = 0; i < 6; i++) {
-    const angle = (Math.PI / 3) * i - Math.PI / 6;
-    const x = px + 11 * Math.cos(angle);
-    const y = py + 11 * Math.sin(angle);
+  for (let i = 0; i < 5; i++) {
+    const a = (Math.PI * 2 / 5) * i - Math.PI / 2;
+    const x = px + 13 * Math.cos(a), y = py + 13 * Math.sin(a);
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.closePath();
