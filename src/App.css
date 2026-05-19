@@ -405,6 +405,9 @@ body {
 
 .player-row:hover { background: rgba(255,255,255,0.04); }
 .birthday-row { background: rgba(16,185,129,0.05); }
+.legend-highlight { background: rgba(245,158,11,0.12) !important; border: 1px solid rgba(245,158,11,0.35); border-radius: 8px; }
+.legend-highlight:hover { background: rgba(245,158,11,0.18) !important; }
+.legend-badge { display: inline-block; margin-left: 8px; padding: 1px 7px; background: rgba(245,158,11,0.2); border: 1px solid rgba(245,158,11,0.5); border-radius: 10px; font-size: 0.68rem; color: #f59e0b; font-weight: 700; letter-spacing: 0.4px; vertical-align: middle; }
 .birthday-row:hover { background: rgba(16,185,129,0.1); }
 
 .player-rank { color: #4a5568; font-size: 0.78rem; text-align: center; }

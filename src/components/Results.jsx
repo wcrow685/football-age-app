@@ -153,10 +153,11 @@ export default function Results({ result, onReset }) {
             </div>
             {sameBirthday.map((p, i) => {
               const color = LEAGUE_COLORS[p.league] || "#6366f1";
+              const isLegend = famousPlayer && p.name.toLowerCase().includes(famousPlayer.split(" ")[1]?.toLowerCase() || famousPlayer.toLowerCase());
               return (
-                <div key={p.name + p.birth} className="player-row birthday-row">
-                  <span className="player-rank">{i + 1}</span>
-                  <a className="player-name player-tm-link" href={`https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=${encodeURIComponent(p.name)}`} target="_blank" rel="noopener noreferrer">{p.name}</a>
+                <div key={p.name + p.birth} className={`player-row birthday-row${isLegend ? " legend-highlight" : ""}`}>
+                  <span className="player-rank">{isLegend ? "⭐" : i + 1}</span>
+                  <a className="player-name player-tm-link" href={p.tmUrl || `https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=${encodeURIComponent(p.name)}`} target="_blank" rel="noopener noreferrer">{p.name}{isLegend && <span className="legend-badge">Legend</span>}</a>
                   <span className="player-club">
                     {p.crest && <img src={p.crest} alt="" className="club-logo" />}
                     {p.club}
