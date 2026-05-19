@@ -40,7 +40,7 @@ function playerAge(birth) {
 }
 
 export default function Results({ result, onReset }) {
-  const { older, olderPlayers, sameBirthday, total, byLeague, topNationalities, ageDistribution, userAge, percentileOlderThan } = result;
+  const { older, olderPlayers, sameBirthday, total, byLeague, topNationalities, ageDistribution, userAge, percentileOlderThan, famousPlayer } = result;
   const [leagueFilter, setLeagueFilter] = useState("All");
   const [showAll, setShowAll] = useState(false);
 
@@ -56,7 +56,9 @@ export default function Results({ result, onReset }) {
       {/* Big number */}
       <div className="big-result">
         <div className="big-number">{older}</div>
-        <div className="big-label">active football players are older than you</div>
+        <div className="big-label">
+          active football players are older than {famousPlayer ? <strong>{famousPlayer}</strong> : "you"}
+        </div>
         <div className="big-sub">out of {total} players in our database</div>
       </div>
 

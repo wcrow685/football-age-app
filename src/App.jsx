@@ -14,6 +14,19 @@ function daysInMonth(month, year) {
   return new Date(year, month, 0).getDate();
 }
 
+const FAMOUS_PLAYERS = [
+  { name: "Lionel Messi",      birth: "1987-06-24", photo: "https://img.a.transfermarkt.technology/portrait/medium/28003-1694529629.jpg" },
+  { name: "Cristiano Ronaldo", birth: "1985-02-05", photo: "https://img.a.transfermarkt.technology/portrait/medium/8198-1716198662.jpg" },
+  { name: "Kylian Mbappé",     birth: "1998-12-20", photo: "https://img.a.transfermarkt.technology/portrait/medium/342229-1720090574.jpg" },
+  { name: "Erling Haaland",    birth: "2000-07-21", photo: "https://img.a.transfermarkt.technology/portrait/medium/418560-1715778481.jpg" },
+  { name: "Vinicius Junior",   birth: "2000-07-12", photo: "https://img.a.transfermarkt.technology/portrait/medium/371998-1710946169.jpg" },
+  { name: "Jude Bellingham",   birth: "2003-06-29", photo: "https://img.a.transfermarkt.technology/portrait/medium/581678-1715345696.jpg" },
+  { name: "Mohamed Salah",     birth: "1992-06-15", photo: "https://img.a.transfermarkt.technology/portrait/medium/148455-1715683864.jpg" },
+  { name: "Lamine Yamal",      birth: "2007-07-13", photo: "https://img.a.transfermarkt.technology/portrait/medium/987714-1722413524.jpg" },
+  { name: "Harry Kane",        birth: "1993-07-28", photo: "https://img.a.transfermarkt.technology/portrait/medium/132098-1715945570.jpg" },
+  { name: "Neymar Jr",         birth: "1992-02-05", photo: "https://img.a.transfermarkt.technology/portrait/medium/68290-1715683897.jpg" },
+];
+
 export default function App() {
   const currentYear = new Date().getFullYear();
   const [day, setDay]       = useState("");
@@ -129,6 +142,53 @@ export default function App() {
     }
   }
 
+  async function handleFamousPlayer(player) {
+    const [y, m, d] = player.birth.split("-");
+    setDay(String(parseInt(d)));
+    setMonth(String(parseInt(m)));
+    setYear(y);
+    // Trigger search with this birth date directly
+    setLoading(true);
+    setLoadingSlow(false);
+    setError(null);
+    const slowTimer = setTimeout(() => setLoadingSlow(true), 5000);
+    try {
+      const url = USE_STATIC ? "/players.json" : `${API_URL}/api/players`;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 60000);
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      const { players, total } = await res.json();
+
+      const userDate = new Date(player.birth);
+      const today = new Date();
+      const olderPlayers = players.filter(p => new Date(p.birth) < userDate).sort((a, b) => new Date(a.birth) - new Date(b.birth));
+      const sameBirthday = players.filter(p => { const dd = new Date(p.birth); return dd.getMonth() === userDate.getMonth() && dd.getDate() === userDate.getDate(); }).sort((a, b) => new Date(a.birth) - new Date(b.birth));
+      const byLeague = {}; olderPlayers.forEach(p => { byLeague[p.league] = (byLeague[p.league] || 0) + 1; });
+      const byNat = {}; olderPlayers.forEach(p => { byNat[p.nationality] = (byNat[p.nationality] || 0) + 1; });
+      const topNationalities = Object.entries(byNat).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([name, count]) => ({ name, count }));
+      const userAgeYears = (today - userDate) / (365.25 * 24 * 3600 * 1000);
+      const buckets = {}; players.forEach(p => { const age = Math.floor((today - new Date(p.birth)) / (365.25 * 24 * 3600 * 1000)); buckets[age] = (buckets[age] || 0) + 1; });
+      const ageDistribution = Object.entries(buckets).map(([age, count]) => ({ age: Number(age), count })).sort((a, b) => a.age - b.age);
+      const younger = players.filter(p => new Date(p.birth) > userDate).length;
+      setResult({
+        older: olderPlayers.length, olderPlayers, sameBirthday, total,
+        byLeague: Object.entries(byLeague).sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count })),
+        topNationalities, ageDistribution,
+        userAge: Math.floor(userAgeYears),
+        percentileOlderThan: Math.round((younger / total) * 100),
+        famousPlayer: player.name,
+      });
+    } catch (err) {
+      setError(err.name === "AbortError" ? "Server is taking too long." : err.message);
+    } finally {
+      clearTimeout(slowTimer);
+      setLoading(false);
+      setLoadingSlow(false);
+    }
+  }
+
   function handleReset() {
     setResult(null);
     setDay(""); setMonth(""); setYear("");
@@ -183,6 +243,17 @@ export default function App() {
               Based on {totalPlayers} active players from Premier League, La Liga,
               Bundesliga, Serie A, Ligue 1, Süper Lig, Saudi Pro League &amp; MLS (2024-25 season).
             </p>
+          </div>
+          <div className="famous-section">
+            <p className="famous-label">Or compare with a legend</p>
+            <div className="famous-grid">
+              {FAMOUS_PLAYERS.map(p => (
+                <button key={p.name} className="famous-card" onClick={() => handleFamousPlayer(p)} disabled={loading}>
+                  <img src={p.photo} alt={p.name} className="famous-photo" onError={e => { e.target.style.display='none'; }} />
+                  <span className="famous-name">{p.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </main>
       ) : (
