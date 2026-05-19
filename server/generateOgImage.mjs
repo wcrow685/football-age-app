@@ -36,10 +36,38 @@ for (let y = 0; y < H; y += 80) {
   ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
 }
 
-// Football emoji (large)
-ctx.font = "110px serif";
-ctx.textAlign = "center";
-ctx.fillText("⚽", W / 2, 180);
+// Football icon — white circle with black pentagon patches
+const cx = W / 2, cy = 148, r = 52;
+// White ball
+ctx.beginPath();
+ctx.arc(cx, cy, r, 0, Math.PI * 2);
+ctx.fillStyle = "#ffffff";
+ctx.fill();
+// Green border
+ctx.strokeStyle = "#10b981";
+ctx.lineWidth = 3;
+ctx.stroke();
+// Pentagon patches
+ctx.fillStyle = "#1a1a2e";
+const patches = [
+  [cx, cy],
+  [cx, cy - 28],
+  [cx + 24, cy - 8],
+  [cx + 15, cy + 22],
+  [cx - 15, cy + 22],
+  [cx - 24, cy - 8],
+];
+patches.forEach(([px, py]) => {
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const angle = (Math.PI / 3) * i - Math.PI / 6;
+    const x = px + 11 * Math.cos(angle);
+    const y = py + 11 * Math.sin(angle);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+});
 
 // Main title
 ctx.fillStyle = "#f1f5f9";
