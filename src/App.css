@@ -31,7 +31,7 @@ body {
 .hero {
   background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0d1f12 100%);
   border-bottom: 1px solid var(--border);
-  padding: 60px 24px 48px;
+  padding: 40px 24px 32px;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -46,8 +46,8 @@ body {
 }
 
 .ball-icon {
-  font-size: 56px;
-  margin-bottom: 16px;
+  font-size: 42px;
+  margin-bottom: 12px;
   display: block;
   animation: spin 8s linear infinite;
 }
@@ -58,16 +58,16 @@ body {
 }
 
 .hero h1 {
-  font-size: clamp(1.6rem, 4vw, 2.8rem);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
   font-weight: 800;
   color: var(--text-h);
   line-height: 1.2;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   letter-spacing: -0.5px;
 }
 
 .subtitle {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   color: #94a3b8;
   max-width: 540px;
   margin: 0 auto;
