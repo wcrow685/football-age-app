@@ -105,7 +105,7 @@ export default function Results({ result, onReset }) {
                 return (
                   <div key={p.name} className="player-row">
                     <span className="player-rank">{i + 1}</span>
-                    <a className="player-name player-tm-link" href={`https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=${encodeURIComponent(p.name)}`} target="_blank" rel="noopener noreferrer">{p.name}</a>
+                    <a className="player-name player-tm-link" href={p.tmUrl || `https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=${encodeURIComponent(p.name)}`} target="_blank" rel="noopener noreferrer">{p.name}</a>
                     <span className="player-club">
                       {p.crest && <img src={p.crest} alt="" className="club-logo" />}
                       <span className="cell-text">{p.club}</span>
