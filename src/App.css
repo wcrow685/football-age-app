@@ -568,15 +568,14 @@ body {
   color: #fff;
 }
 
-.share-wa {
-  background: #25D366;
+.share-fb {
+  background: #1877F2;
   color: #fff;
 }
 
-.share-copy {
-  background: var(--card);
-  color: var(--text-h);
-  border: 1px solid var(--border);
+.share-wa {
+  background: #25D366;
+  color: #fff;
 }
 
 /* ── Reset button ────────────────────────────────────────────────────── */
