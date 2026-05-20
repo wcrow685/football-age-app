@@ -105,7 +105,7 @@ export const translations = {
 
     // Big result
     olderThanYou: "futbolcu senden daha yaşlı",
-    you: "sen",
+    you: "",
     outOf: (total) => `veritabanımızdaki ${total} oyuncu içinden`,
 
     // Stat cards
