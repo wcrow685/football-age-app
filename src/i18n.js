@@ -87,7 +87,7 @@ export const translations = {
 
   tr: {
     // Header
-    title: "Kaç Futbolcu\nBenden Yaşlı?",
+    title: "Kaç Futbolcu\nBenden Daha Yaşlı?",
     subtitle: "Dünyanın en büyük liglerindeki aktif profesyonel futbolcularla yaşını karşılaştır.",
 
     // Input
