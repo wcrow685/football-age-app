@@ -39,45 +39,43 @@ function playerAge(birth) {
   return age;
 }
 
-function ShareButtons({ older, total, famousPlayer }) {
-  const shareText = famousPlayer
-    ? `${famousPlayer} is older than ${older} out of ${total} active professional footballers! ⚽ How do you compare?`
-    : `I'm older than ${older} out of ${total} active professional footballers! ⚽ How do you compare?`;
-  const shareUrl = "https://www.howmanyfootballplayersolderthanme.com";
-  const fullText = `${shareText} ${shareUrl}`;
+function ShareButtons({ older, total, famousPlayer, t }) {
+  const shareText = t.shareText(older, total, famousPlayer);
+  const shareUrl  = "https://www.howmanyfootballplayersolderthanme.com";
+  const fullText  = `${shareText} ${shareUrl}`;
 
-  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+  const twitterUrl  = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(fullText)}`;
   const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
 
   return (
     <div className="share-buttons">
-      <span className="share-label">Share your result</span>
+      <span className="share-label">{t.shareResult}</span>
       <div className="share-row">
         <a className="share-btn share-x" href={twitterUrl} target="_blank" rel="noopener noreferrer">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          Share on X
+          {t.shareOnX}
         </a>
         <a className="share-btn share-fb" href={facebookUrl} target="_blank" rel="noopener noreferrer">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-          Facebook
+          {t.facebook}
         </a>
         <a className="share-btn share-wa" href={whatsappUrl} target="_blank" rel="noopener noreferrer">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-          WhatsApp
+          {t.whatsapp}
         </a>
       </div>
     </div>
   );
 }
 
-export default function Results({ result, onReset }) {
+export default function Results({ result, onReset, t }) {
   const { older, olderPlayers, sameBirthday, total, byLeague, topNationalities, ageDistribution, userAge, percentileOlderThan, famousPlayer } = result;
-  const [leagueFilter, setLeagueFilter] = useState("All");
+  const [leagueFilter, setLeagueFilter] = useState(t.all);
   const [showAll, setShowAll] = useState(false);
 
-  const leagues = ["All", ...byLeague.map(l => l.name).filter(n => LEAGUE_COLORS[n])];
-  const filtered = leagueFilter === "All"
+  const leagues = [t.all, ...byLeague.map(l => l.name).filter(n => LEAGUE_COLORS[n])];
+  const filtered = leagueFilter === t.all
     ? olderPlayers
     : olderPlayers.filter(p => p.league === leagueFilter);
   const displayed = showAll ? filtered : filtered.slice(0, 20);
@@ -89,52 +87,52 @@ export default function Results({ result, onReset }) {
       <div className="big-result">
         <div className="big-number">{older}</div>
         <div className="big-label">
-          active football players are older than {famousPlayer ? <strong>{famousPlayer}</strong> : "you"}
+          {t.olderThanYou} {famousPlayer ? <strong>{famousPlayer}</strong> : t.you}
         </div>
-        <div className="big-sub">out of {total} players in our database</div>
+        <div className="big-sub">{t.outOf(total)}</div>
       </div>
 
-      <ShareButtons older={older} total={total} famousPlayer={famousPlayer} />
+      <ShareButtons older={older} total={total} famousPlayer={famousPlayer} t={t} />
 
       {/* Stat cards */}
       <div className="stat-cards">
-        <StatCard label="Your Age"       value={`${userAge}`}          sub="years old"                                        accent="#3b82f6" />
-        <StatCard label="Older Than You" value={`${older}`}            sub={`${Math.round((older/total)*100)}% of players`}   accent="#10b981" />
-        <StatCard label="Younger Than You" value={`${total - older}`}  sub={`${Math.round(((total-older)/total)*100)}% of players`} accent="#ef4444" />
-        <StatCard label="You're Older Than" value={`${percentileOlderThan}%`} sub="of all players"                           accent="#f59e0b" />
+        <StatCard label={t.yourAge}         value={`${userAge}`}               sub={t.yearsOld}                                       accent="#3b82f6" />
+        <StatCard label={t.olderThanYouLabel} value={`${older}`}               sub={t.ofPlayers(Math.round((older/total)*100))}        accent="#10b981" />
+        <StatCard label={t.youngerThanYou}  value={`${total - older}`}         sub={t.ofPlayers(Math.round(((total-older)/total)*100))} accent="#ef4444" />
+        <StatCard label={t.youreOlderThan}  value={`${percentileOlderThan}%`}  sub={t.ofAllPlayers}                                   accent="#f59e0b" />
       </div>
 
       {/* Player list */}
       <div className="chart-section">
-        <h2>Players Older Than You ({older})</h2>
-        <p className="chart-desc">Sorted from oldest to youngest</p>
+        <h2>{t.playersOlderTitle(older)}</h2>
+        <p className="chart-desc">{t.sortedOldest}</p>
 
         <div className="filter-tabs">
           {leagues.map(l => (
             <button
               key={l}
               className={`filter-tab ${leagueFilter === l ? "active" : ""}`}
-              style={leagueFilter === l && l !== "All" ? { borderColor: LEAGUE_COLORS[l], color: LEAGUE_COLORS[l], background: `${LEAGUE_COLORS[l]}18` } : {}}
+              style={leagueFilter === l && l !== t.all ? { borderColor: LEAGUE_COLORS[l], color: LEAGUE_COLORS[l], background: `${LEAGUE_COLORS[l]}18` } : {}}
               onClick={() => { setLeagueFilter(l); setShowAll(false); }}
             >
-              {l === "All" ? `All (${older})` : `${l} (${byLeague.find(x => x.name === l)?.count ?? 0})`}
+              {l === t.all ? `${t.all} (${older})` : `${l} (${byLeague.find(x => x.name === l)?.count ?? 0})`}
             </button>
           ))}
         </div>
 
         {filtered.length === 0 ? (
-          <p className="no-players">No players older than you in this league.</p>
+          <p className="no-players">{t.noPlayersLeague}</p>
         ) : (
           <>
             <div className="player-list">
               <div className="player-list-header">
                 <span>#</span>
-                <span>Player</span>
-                <span>Club</span>
-                <span>League</span>
-                <span>Nationality</span>
-                <span>Age</span>
-                <span>Born</span>
+                <span>{t.colPlayer}</span>
+                <span>{t.colClub}</span>
+                <span>{t.colLeague}</span>
+                <span>{t.colNationality}</span>
+                <span>{t.colAge}</span>
+                <span>{t.colBorn}</span>
               </div>
               {displayed.map((p, i) => {
                 const color = LEAGUE_COLORS[p.league] || "#6366f1";
@@ -159,7 +157,7 @@ export default function Results({ result, onReset }) {
             </div>
             {filtered.length > 20 && !showAll && (
               <button className="show-more" onClick={() => setShowAll(true)}>
-                Show all {filtered.length} players ↓
+                {t.showAll(filtered.length)}
               </button>
             )}
           </>
@@ -168,22 +166,20 @@ export default function Results({ result, onReset }) {
 
       {/* Same birthday */}
       <div className="chart-section">
-        <h2>Same Birthday as You 🎂</h2>
-        <p className="chart-desc">
-          Players born on the same day &amp; month — any year
-        </p>
+        <h2>{t.sameBirthdayTitle}</h2>
+        <p className="chart-desc">{t.sameBirthdayDesc}</p>
         {sameBirthday.length === 0 ? (
-          <p className="no-players">No players share your birthday.</p>
+          <p className="no-players">{t.noBirthday}</p>
         ) : (
           <div className="player-list">
             <div className="player-list-header">
               <span>#</span>
-              <span>Player</span>
-              <span>Club</span>
-              <span>League</span>
-              <span>Nationality</span>
-              <span>Age</span>
-              <span>Born</span>
+              <span>{t.colPlayer}</span>
+              <span>{t.colClub}</span>
+              <span>{t.colLeague}</span>
+              <span>{t.colNationality}</span>
+              <span>{t.colAge}</span>
+              <span>{t.colBorn}</span>
             </div>
             {sameBirthday.map((p, i) => {
               const color = LEAGUE_COLORS[p.league] || "#6366f1";
@@ -211,8 +207,8 @@ export default function Results({ result, onReset }) {
 
       {/* League chart */}
       <div className="chart-section">
-        <h2>Older Players by League</h2>
-        <p className="chart-desc">Number of players older than you in each league</p>
+        <h2>{t.olderByLeague}</h2>
+        <p className="chart-desc">{t.olderByLeagueDesc}</p>
         <div className="chart-wrap">
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={byLeague} margin={{ top: 10, right: 20, left: 0, bottom: 60 }}>
@@ -230,8 +226,8 @@ export default function Results({ result, onReset }) {
 
       {/* Nationality chart */}
       <div className="chart-section">
-        <h2>Top Nationalities — Older Players</h2>
-        <p className="chart-desc">Which countries have the most players older than you</p>
+        <h2>{t.topNationalities}</h2>
+        <p className="chart-desc">{t.topNationalitiesDesc}</p>
         <div className="chart-wrap">
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={topNationalities} layout="vertical" margin={{ top: 10, right: 40, left: 110, bottom: 10 }}>
@@ -249,10 +245,8 @@ export default function Results({ result, onReset }) {
 
       {/* Age distribution */}
       <div className="chart-section">
-        <h2>Age Distribution of All Players</h2>
-        <p className="chart-desc">
-          Where you stand among all {total} players — the green line marks your age ({userAge})
-        </p>
+        <h2>{t.ageDistTitle}</h2>
+        <p className="chart-desc">{t.ageDistDesc(total, userAge)}</p>
         <div className="chart-wrap">
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={ageDistribution} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
@@ -262,10 +256,10 @@ export default function Results({ result, onReset }) {
               <Tooltip
                 contentStyle={{ background: "#1a1a2e", border: "1px solid #2a2a3a", borderRadius: 8 }}
                 labelStyle={{ color: "#e2e8f0" }} itemStyle={{ color: "#e2e8f0" }}
-                formatter={v => [v, "Players"]} labelFormatter={l => `Age ${l}`}
+                formatter={v => [v, t.playersLabel]} labelFormatter={l => t.ageLabel(l)}
               />
               <ReferenceLine x={userAge} stroke="#10b981" strokeWidth={2} strokeDasharray="6 3"
-                label={{ value: "You", fill: "#10b981", fontSize: 13, position: "top" }} />
+                label={{ value: t.youLabel, fill: "#10b981", fontSize: 13, position: "top" }} />
               <Bar dataKey="count" fill="#3b82f6" radius={[3, 3, 0, 0]} opacity={0.85} />
             </BarChart>
           </ResponsiveContainer>
@@ -274,12 +268,12 @@ export default function Results({ result, onReset }) {
 
       {/* League breakdown table */}
       <div className="chart-section">
-        <h2>Full League Breakdown</h2>
+        <h2>{t.leagueBreakdown}</h2>
         <div className="league-table">
           <div className="league-table-header">
-            <span>League</span>
-            <span>Older than you</span>
-            <span>Share</span>
+            <span>{t.leagueCol}</span>
+            <span>{t.olderCol}</span>
+            <span>{t.shareCol}</span>
           </div>
           {byLeague.map(row => {
             const color = LEAGUE_COLORS[row.name] || "#6366f1";
@@ -303,7 +297,7 @@ export default function Results({ result, onReset }) {
       </div>
 
       <div className="reset-wrap">
-        <button className="btn-secondary" onClick={onReset}>Try Another Date</button>
+        <button className="btn-secondary" onClick={onReset}>{t.tryAnother}</button>
       </div>
     </main>
   );

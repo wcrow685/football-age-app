@@ -1,14 +1,10 @@
 import { useState, useEffect } from "react";
 import Results from "./components/Results";
+import { translations } from "./i18n";
 import "./App.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 const USE_STATIC = import.meta.env.VITE_USE_STATIC !== "false";
-
-const MONTHS = [
-  "January","February","March","April","May","June",
-  "July","August","September","October","November","December"
-];
 
 const SHORT_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -46,10 +42,19 @@ export default function App() {
   const [loadingSlow, setLoadingSlow] = useState(false);
   const [error, setError]   = useState(null);
   const [totalPlayers, setTotalPlayers] = useState("...");
+  const [lang, setLang]     = useState(() => localStorage.getItem("lang") || "en");
+
+  const t = translations[lang];
 
   const maxDays = month && year ? daysInMonth(Number(month), Number(year)) : 31;
   const years = Array.from({ length: currentYear - 1939 }, (_, i) => currentYear - i);
   const days  = Array.from({ length: maxDays }, (_, i) => i + 1);
+
+  function toggleLang() {
+    const next = lang === "en" ? "tr" : "en";
+    setLang(next);
+    localStorage.setItem("lang", next);
+  }
 
   // Fetch total count for the hint text
   useEffect(() => {
@@ -208,31 +213,33 @@ export default function App() {
     <div className="app">
       <header className="hero">
         <div className="hero-content">
+          <button className="lang-toggle" onClick={toggleLang}>
+            {lang === "en" ? "🇹🇷 TR" : "🇬🇧 EN"}
+          </button>
           <div className="ball-icon" style={{ cursor: result ? "pointer" : "default" }} onClick={result ? handleReset : undefined}>⚽</div>
-          <h1 style={{ cursor: result ? "pointer" : "default" }} onClick={result ? handleReset : undefined}>How Many Football Players<br />Are Older Than Me?</h1>
-          <p className="subtitle">
-            Find out how you compare in age to today's top active football players
-            across the world's biggest leagues.
-          </p>
+          <h1 style={{ cursor: result ? "pointer" : "default" }} onClick={result ? handleReset : undefined}>
+            {t.title.split("\n").map((line, i) => <span key={i}>{line}{i === 0 && <br />}</span>)}
+          </h1>
+          <p className="subtitle">{t.subtitle}</p>
         </div>
       </header>
 
       {!result ? (
         <main className="input-section">
           <div className="card input-card">
-            <h2>Enter Your Birth Date</h2>
+            <h2>{t.enterBirthDate}</h2>
             <form onSubmit={handleSubmit}>
               <div className="date-dropdowns">
                 <select value={day} onChange={e => setDay(e.target.value)} required>
-                  <option value="" disabled>Day</option>
+                  <option value="" disabled>{t.day}</option>
                   {days.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
                 <select value={month} onChange={e => setMonth(e.target.value)} required>
-                  <option value="" disabled>Month</option>
-                  {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                  <option value="" disabled>{t.month}</option>
+                  {t.months.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
                 </select>
                 <select value={year} onChange={e => setYear(e.target.value)} required>
-                  <option value="" disabled>Year</option>
+                  <option value="" disabled>{t.year}</option>
                   {years.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
               </div>
@@ -240,21 +247,18 @@ export default function App() {
               {error && <p className="error-msg">{error}</p>}
 
               <button type="submit" className="btn-primary" disabled={loading}>
-                {loading ? <span className="spinner" /> : "Compare Me →"}
+                {loading ? <span className="spinner" /> : t.compareBtn}
               </button>
               {loadingSlow && (
                 <p className="hint" style={{color: "#94a3b8", marginTop: 8}}>
-                  Server is waking up, please wait a moment...
+                  {t.serverWaking}
                 </p>
               )}
             </form>
-            <p className="hint">
-              Based on {totalPlayers} active players from Premier League, La Liga,
-              Bundesliga, Serie A, Ligue 1, Süper Lig, Saudi Pro League &amp; MLS (2025-26 season).
-            </p>
+            <p className="hint">{t.hint(totalPlayers)}</p>
           </div>
           <div className="famous-section">
-            <p className="famous-label">Or compare with a famous player</p>
+            <p className="famous-label">{t.orCompareFamous}</p>
             <div className="famous-grid">
               {FAMOUS_PLAYERS.map(p => (
                 <button key={p.name} className="famous-card" onClick={() => handleFamousPlayer(p)} disabled={loading}>
@@ -266,11 +270,11 @@ export default function App() {
           </div>
         </main>
       ) : (
-        <Results result={result} onReset={handleReset} />
+        <Results result={result} onReset={handleReset} t={t} />
       )}
 
       <footer>
-        <p>Data from ESPN · 2025-26 season · For entertainment purposes only.</p>
+        <p>{t.footer}</p>
       </footer>
     </div>
   );
