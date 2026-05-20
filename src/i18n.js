@@ -104,7 +104,7 @@ export const translations = {
     months: ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"],
 
     // Big result
-    olderThanYou: "aktif futbolcu senden yaşlı",
+    olderThanYou: "futbolcu senden daha yaşlı",
     you: "sen",
     outOf: (total) => `veritabanımızdaki ${total} oyuncu içinden`,
 
