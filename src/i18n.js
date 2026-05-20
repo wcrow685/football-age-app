@@ -97,8 +97,8 @@ export const translations = {
     year: "Yıl",
     compareBtn: "Karşılaştır →",
     serverWaking: "Sunucu uyanıyor, lütfen bekle...",
-    hint: (total) => `Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Süper Lig, Suudi Pro Ligi ve MLS'den ${total} aktif oyuncuya göre (2025-26 sezonu).`,
-    orCompareFamous: "Ya da ünlü bir oyuncuyla karşılaştır",
+    hint: (total) => `Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Süper Lig, Suudi Pro Ligi ve MLS'den ${total} aktif futbolcuya göre (2025-26 sezonu).`,
+    orCompareFamous: "Ya da ünlü bir futbolcuyla karşılaştır",
 
     // Months
     months: ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"],
@@ -106,23 +106,23 @@ export const translations = {
     // Big result
     olderThanYou: "futbolcu senden daha yaşlı",
     you: "",
-    outOf: (total) => `veritabanımızdaki ${total} oyuncu içinden`,
+    outOf: (total) => `veritabanımızdaki ${total} futbolcu içinden`,
 
     // Stat cards
     yourAge: "Yaşın",
     yearsOld: "yaşında",
     olderThanYouLabel: "Senden Yaşlı",
-    ofPlayers: (pct) => `oyuncuların %${pct}'i`,
+    ofPlayers: (pct) => `futbolcuların %${pct}'i`,
     youngerThanYou: "Senden Genç",
     youreOlderThan: "Sen Daha Büyüksün",
-    ofAllPlayers: "tüm oyunculardan",
+    ofAllPlayers: "tüm futbolculardan",
 
     // Player list
     playersOlderTitle: (n) => `Senden Yaşlı Oyuncular (${n})`,
     sortedOldest: "En yaşlıdan en gence",
     all: "Tümü",
-    noPlayersLeague: "Bu ligde senden yaşlı oyuncu yok.",
-    showAll: (n) => `Tüm ${n} oyuncuyu göster ↓`,
+    noPlayersLeague: "Bu ligde senden yaşlı futbolcu yok.",
+    showAll: (n) => `Tüm ${n} futbolcuyu göster ↓`,
 
     // Table headers
     colPlayer: "Oyuncu",
@@ -134,16 +134,16 @@ export const translations = {
 
     // Birthday section
     sameBirthdayTitle: "Seninle Aynı Doğum Günü 🎂",
-    sameBirthdayDesc: "Aynı gün ve ay doğan oyuncular — farklı yıllar",
-    noBirthday: "Doğum gününü paylaşan oyuncu bulunamadı.",
+    sameBirthdayDesc: "Aynı gün ve ay doğan futbolcular — farklı yıllar",
+    noBirthday: "Doğum gününü paylaşan futbolcu bulunamadı.",
 
     // Charts
     olderByLeague: "Lige Göre Senden Yaşlı Oyuncular",
-    olderByLeagueDesc: "Her ligde senden kaç oyuncu daha yaşlı",
+    olderByLeagueDesc: "Her ligde senden kaç futbolcu daha yaşlı",
     topNationalities: "En Fazla Yaşlı Oyuncu — Milliyete Göre",
-    topNationalitiesDesc: "Hangi ülkede senden en fazla yaşlı oyuncu var",
+    topNationalitiesDesc: "Hangi ülkede senden en fazla yaşlı futbolcu var",
     ageDistTitle: "Tüm Oyuncuların Yaş Dağılımı",
-    ageDistDesc: (total, age) => `Tüm ${total} oyuncu arasındaki yerin — yeşil çizgi senin yaşını (${age}) gösteriyor`,
+    ageDistDesc: (total, age) => `Tüm ${total} futbolcu arasındaki yerin — yeşil çizgi senin yaşını (${age}) gösteriyor`,
     youLabel: "Sen",
     playersLabel: "Oyuncu",
     ageLabel: (n) => `${n} Yaş`,
