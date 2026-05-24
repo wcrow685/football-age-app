@@ -433,8 +433,8 @@ body {
 
 .player-rank { color: #4a5568; font-size: 0.78rem; text-align: center; }
 .player-name { color: var(--text-h); font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.player-tm-link { text-decoration: none; transition: color 0.15s; }
-.player-tm-link:hover { color: var(--green); text-decoration: underline; cursor: pointer; }
+.player-stats-link { text-decoration: none; transition: color 0.15s; }
+.player-stats-link:hover { color: var(--green); text-decoration: underline; cursor: pointer; }
 .player-club { color: #94a3b8; display: flex; align-items: center; gap: 5px; min-width: 0; overflow: hidden; }
 .player-league { font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 5px; min-width: 0; overflow: hidden; }
 .player-nat  { color: #94a3b8; font-size: 0.82rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
