@@ -1,0 +1,10 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "howmanyfootballplayersolderthanme.com" }],
+      "destination": "https://www.howmanyfootballplayersolderthanme.com/$1",
+      "permanent": true
+    }
+  ]
+}
