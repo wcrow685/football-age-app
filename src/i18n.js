@@ -11,7 +11,7 @@ export const translations = {
     year: "Year",
     compareBtn: "Compare Me →",
     serverWaking: "Server is waking up, please wait a moment...",
-    hint: (total) => `Based on ${total} active players from Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Eredivisie, Liga Portugal, Süper Lig, Saudi Pro League & MLS (2025-26 season).`,
+    hint: (total) => `Based on ${total} active players from Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Eredivisie, Liga Portugal, Süper Lig, Saudi Pro League & MLS (2026-27 season).`,
     orCompareFamous: "Or compare with a famous player",
 
     // Months
@@ -82,7 +82,7 @@ export const translations = {
         : `I'm older than ${older} out of ${total} active professional footballers! ⚽ How do you compare?`,
 
     // Footer
-    footer: "Data from ESPN · 2025-26 season · For entertainment purposes only.",
+    footer: "Data from ESPN · 2026-27 season · For entertainment purposes only.",
   },
 
   tr: {
@@ -97,7 +97,7 @@ export const translations = {
     year: "Yıl",
     compareBtn: "Karşılaştır →",
     serverWaking: "Sunucu uyanıyor, lütfen bekle...",
-    hint: (total) => `Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Eredivisie, Liga Portugal, Süper Lig, Suudi Pro Ligi ve MLS'den ${total} aktif futbolcuya göre (2025-26 sezonu).`,
+    hint: (total) => `Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Eredivisie, Liga Portugal, Süper Lig, Suudi Pro Ligi ve MLS'den ${total} aktif futbolcuya göre (2026-27 sezonu).`,
     orCompareFamous: "Ya da ünlü bir futbolcuyla karşılaştır",
 
     // Months
@@ -168,6 +168,6 @@ export const translations = {
         : `${total} aktif profesyonel futbolcudan ${older} tanesinden daha yaşlıyım! ⚽ Ya sen?`,
 
     // Footer
-    footer: "Veriler ESPN'den · 2025-26 sezonu · Yalnızca eğlence amaçlıdır.",
+    footer: "Veriler ESPN'den · 2026-27 sezonu · Yalnızca eğlence amaçlıdır.",
   },
 };
