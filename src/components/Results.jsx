@@ -69,13 +69,16 @@ function ShareButtons({ older, total, famousPlayer, t }) {
   );
 }
 
+// Language-independent sentinel so the "All" tab survives a language switch
+const ALL = "__all__";
+
 export default function Results({ result, onReset, t }) {
   const { older, olderPlayers, sameBirthday, total, byLeague, topNationalities, ageDistribution, userAge, percentileOlderThan, famousPlayer } = result;
-  const [leagueFilter, setLeagueFilter] = useState(t.all);
+  const [leagueFilter, setLeagueFilter] = useState(ALL);
   const [showAll, setShowAll] = useState(false);
 
-  const leagues = [t.all, ...byLeague.map(l => l.name).filter(n => LEAGUE_COLORS[n])];
-  const filtered = leagueFilter === t.all
+  const leagues = [ALL, ...byLeague.map(l => l.name).filter(n => LEAGUE_COLORS[n])];
+  const filtered = leagueFilter === ALL
     ? olderPlayers
     : olderPlayers.filter(p => p.league === leagueFilter);
   const displayed = showAll ? filtered : filtered.slice(0, 20);
@@ -112,10 +115,10 @@ export default function Results({ result, onReset, t }) {
             <button
               key={l}
               className={`filter-tab ${leagueFilter === l ? "active" : ""}`}
-              style={leagueFilter === l && l !== t.all ? { borderColor: LEAGUE_COLORS[l], color: LEAGUE_COLORS[l], background: `${LEAGUE_COLORS[l]}18` } : {}}
+              style={leagueFilter === l && l !== ALL ? { borderColor: LEAGUE_COLORS[l], color: LEAGUE_COLORS[l], background: `${LEAGUE_COLORS[l]}18` } : {}}
               onClick={() => { setLeagueFilter(l); setShowAll(false); }}
             >
-              {l === t.all ? `${t.all} (${older})` : `${l} (${byLeague.find(x => x.name === l)?.count ?? 0})`}
+              {l === ALL ? `${t.all} (${older})` : `${l} (${byLeague.find(x => x.name === l)?.count ?? 0})`}
             </button>
           ))}
         </div>

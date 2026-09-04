@@ -33,7 +33,7 @@ export const translations = {
 
     // Player list
     playersOlderTitle: (n) => `Players Older Than You (${n})`,
-    sortedOldest: "Sorted from oldest to youngest",
+    sortedOldest: "Sorted from youngest to oldest",
     all: "All",
     noPlayersLeague: "No players older than you in this league.",
     showAll: (n) => `Show all ${n} players ↓`,
@@ -119,7 +119,7 @@ export const translations = {
 
     // Player list
     playersOlderTitle: (n) => `Senden Yaşlı Oyuncular (${n})`,
-    sortedOldest: "En yaşlıdan en gence",
+    sortedOldest: "En gençten en yaşlıya",
     all: "Tümü",
     noPlayersLeague: "Bu ligde senden yaşlı futbolcu yok.",
     showAll: (n) => `Tüm ${n} futbolcuyu göster ↓`,

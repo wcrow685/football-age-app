@@ -26,3 +26,7 @@ dist-ssr
 # Server secrets
 server/.env
 server/players-cache.json
+.vercel
+
+# Local data backups
+players.backup-*.json

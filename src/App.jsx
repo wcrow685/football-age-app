@@ -97,7 +97,7 @@ export default function App() {
 
       const olderPlayers = players
         .filter(p => new Date(p.birth) < userDate)
-        .sort((a, b) => new Date(a.birth) - new Date(b.birth));
+        .sort((a, b) => new Date(b.birth) - new Date(a.birth));
 
       // Same day & month, any year
       const sameBirthday = players
@@ -177,7 +177,7 @@ export default function App() {
 
       const userDate = new Date(player.birth);
       const today = new Date();
-      const olderPlayers = players.filter(p => new Date(p.birth) < userDate).sort((a, b) => new Date(a.birth) - new Date(b.birth));
+      const olderPlayers = players.filter(p => new Date(p.birth) < userDate).sort((a, b) => new Date(b.birth) - new Date(a.birth));
       const sameBirthday = players.filter(p => { const dd = new Date(p.birth); return dd.getMonth() === userDate.getMonth() && dd.getDate() === userDate.getDate(); }).sort((a, b) => new Date(a.birth) - new Date(b.birth));
       const byLeague = {}; olderPlayers.forEach(p => { byLeague[p.league] = (byLeague[p.league] || 0) + 1; });
       const byNat = {}; olderPlayers.forEach(p => { byNat[p.nationality] = (byNat[p.nationality] || 0) + 1; });
