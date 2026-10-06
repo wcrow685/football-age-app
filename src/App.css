@@ -300,7 +300,11 @@ button, select { font: inherit; }
 
 .eyebrow { font-size: 14px; letter-spacing: 0.14em; color: var(--muted); }
 .share { display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 24px; border: 1px solid var(--line); border-radius: var(--radius); }
-.share-row { display: flex; flex-wrap: wrap; gap: 10px; }
+/* Two equal main actions over three equal social links */
+.share-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.share-main { grid-column: span 3; }
+.share-social { grid-column: span 2; padding: 0 10px; }
+.share-social-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .panel { display: flex; flex-direction: column; gap: 16px; min-width: 0; padding: 24px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--turf); }
 .panel-outline { background: transparent; }
@@ -400,4 +404,7 @@ button, select { font: inherit; }
   .panel, .share { padding: 16px; }
   .squad-row { grid-template-columns: minmax(0, 1fr) 36px 84px; }
   .squad-row > :nth-child(2) { display: none; }
+  .share-main { grid-column: 1 / -1; }
+  /* Labels don't fit three across on a phone; the links keep their aria-label */
+  .share-social-label { display: none; }
 }
