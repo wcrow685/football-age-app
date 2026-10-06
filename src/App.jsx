@@ -139,13 +139,9 @@ const FAMOUS_PLAYERS = [
   { name: "Mohamed Salah",     birth: "1992-06-15", trFrom: "Mohamed Salah'tan" },
   { name: "Lamine Yamal",      birth: "2007-07-13", trFrom: "Lamine Yamal'dan" },
   { name: "Harry Kane",        birth: "1993-07-28", trFrom: "Harry Kane'den" },
-  { name: "Neymar Jr",         birth: "1992-02-05", trFrom: "Neymar Jr'dan" },
   { name: "Pedri",             birth: "2002-11-25", trFrom: "Pedri'den" },
   { name: "Rodri",             birth: "1996-06-22", trFrom: "Rodri'den" },
   { name: "Arda Güler",        birth: "2005-02-25", trFrom: "Arda Güler'den", turkish: true },
-  { name: "Kenan Yıldız",      birth: "2005-05-04", trFrom: "Kenan Yıldız'dan", turkish: true },
-  { name: "Ferdi Kadıoğlu",    birth: "1999-10-07", trFrom: "Ferdi Kadıoğlu'ndan", turkish: true },
-  { name: "Barış Alper Yılmaz", birth: "2000-05-23", trFrom: "Barış Alper Yılmaz'dan", turkish: true },
 ];
 
 const LEAGUES = ["Premier League", "La Liga", "Bundesliga", "Serie A", "Ligue 1", "Eredivisie", "Liga Portugal", "Süper Lig", "Saudi Pro League", "MLS"];
@@ -307,7 +303,7 @@ export default function App() {
     window.history.pushState(null, "", "/");
   }
 
-  // Turkish visitors see the Turkish players first.
+  // Turkish visitors see Arda Güler first.
   const famousPlayers = lang === "tr"
     ? [...FAMOUS_PLAYERS.filter(p => p.turkish), ...FAMOUS_PLAYERS.filter(p => !p.turkish)]
     : FAMOUS_PLAYERS;
