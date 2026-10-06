@@ -13,6 +13,8 @@ const LEAGUE_COLORS = {
   "Süper Lig":        "#ec4899",
   "Saudi Pro League": "#14b8a6",
   "MLS":              "#f97316",
+  "Eredivisie":       "#eab308",
+  "Liga Portugal":    "#22c55e",
 };
 
 const NAT_COLORS = [
@@ -30,6 +32,20 @@ function StatCard({ label, value, sub, accent }) {
   );
 }
 
+// Whole percentages hide small shares (23/5757 → "0%"), so show one decimal near 0 and 100.
+function formatPct(part, total, decimalSep) {
+  const pct = (part / total) * 100;
+  const text = pct > 0 && pct < 0.1 ? "<0.1"
+             : pct > 99.9 && pct < 100 ? ">99.9"
+             : pct > 0 && pct < 1 ? pct.toFixed(1)
+             : pct > 99 && pct < 100 ? pct.toFixed(1)
+             : String(Math.round(pct));
+  return text.replace(".", decimalSep);
+}
+
+// Two players can share a name (e.g. both Luis Suárez), so key on more than the name.
+const playerKey = p => `${p.name}|${p.birth}|${p.club}`;
+
 function playerAge(birth) {
   const today = new Date();
   const b = new Date(birth);
@@ -39,8 +55,8 @@ function playerAge(birth) {
   return age;
 }
 
-function ShareButtons({ older, total, famousPlayer, t }) {
-  const shareText = t.shareText(older, total, famousPlayer);
+function ShareButtons({ older, total, famous, t }) {
+  const shareText = t.shareText(older, total, famous);
   const shareUrl  = "https://www.howmanyfootballplayersolderthanme.com";
   const fullText  = `${shareText} ${shareUrl}`;
 
@@ -73,7 +89,9 @@ function ShareButtons({ older, total, famousPlayer, t }) {
 const ALL = "__all__";
 
 export default function Results({ result, onReset, t }) {
-  const { older, olderPlayers, sameBirthday, total, byLeague, topNationalities, ageDistribution, userAge, percentileOlderThan, famousPlayer } = result;
+  const { older, olderPlayers, sameBirthday, total, byLeague, topNationalities, ageDistribution, userAge, younger, famous } = result;
+  const subject = famous ? t.them(famous) : t.me;
+  const pct = n => formatPct(n, total, t.decimalSep);
   const [leagueFilter, setLeagueFilter] = useState(ALL);
   const [showAll, setShowAll] = useState(false);
 
@@ -90,24 +108,24 @@ export default function Results({ result, onReset, t }) {
       <div className="big-result">
         <div className="big-number">{older}</div>
         <div className="big-label">
-          {t.olderThanYou} {famousPlayer ? <strong>{famousPlayer}</strong> : t.you}
+          {subject.bigBefore}{subject.bigName && <strong>{subject.bigName}</strong>}{subject.bigAfter}
         </div>
         <div className="big-sub">{t.outOf(total)}</div>
       </div>
 
-      <ShareButtons older={older} total={total} famousPlayer={famousPlayer} t={t} />
+      <ShareButtons older={older} total={total} famous={famous} t={t} />
 
       {/* Stat cards */}
       <div className="stat-cards">
-        <StatCard label={t.yourAge}         value={`${userAge}`}               sub={t.yearsOld}                                       accent="#3b82f6" />
-        <StatCard label={t.olderThanYouLabel} value={`${older}`}               sub={t.ofPlayers(Math.round((older/total)*100))}        accent="#10b981" />
-        <StatCard label={t.youngerThanYou}  value={`${total - older}`}         sub={t.ofPlayers(Math.round(((total-older)/total)*100))} accent="#ef4444" />
-        <StatCard label={t.youreOlderThan}  value={`${percentileOlderThan}%`}  sub={t.ofAllPlayers}                                   accent="#f59e0b" />
+        <StatCard label={subject.age}               value={`${userAge}`}          sub={t.yearsOld}                    accent="#3b82f6" />
+        <StatCard label={subject.olderLabel}        value={`${older}`}            sub={t.ofPlayers(pct(older))}       accent="#10b981" />
+        <StatCard label={subject.youngerLabel}      value={`${younger}`}          sub={t.ofPlayers(pct(younger))}     accent="#ef4444" />
+        <StatCard label={subject.olderThanPctLabel} value={t.percent(pct(younger))} sub={t.ofAllPlayers}                accent="#f59e0b" />
       </div>
 
       {/* Player list */}
       <div className="chart-section">
-        <h2>{t.playersOlderTitle(older)}</h2>
+        <h2>{subject.olderTitle(older)}</h2>
         <p className="chart-desc">{t.sortedOldest}</p>
 
         <div className="filter-tabs">
@@ -124,7 +142,7 @@ export default function Results({ result, onReset, t }) {
         </div>
 
         {filtered.length === 0 ? (
-          <p className="no-players">{t.noPlayersLeague}</p>
+          <p className="no-players">{subject.noPlayersLeague}</p>
         ) : (
           <>
             <div className="player-list">
@@ -140,7 +158,7 @@ export default function Results({ result, onReset, t }) {
               {displayed.map((p, i) => {
                 const color = LEAGUE_COLORS[p.league] || "#6366f1";
                 return (
-                  <div key={p.name} className="player-row">
+                  <div key={playerKey(p)} className="player-row">
                     <span className="player-rank">{i + 1}</span>
                     {p.tmUrl
                       ? <a className="player-name player-stats-link" href={p.tmUrl} target="_blank" rel="noopener noreferrer">{p.name}</a>
@@ -172,10 +190,10 @@ export default function Results({ result, onReset, t }) {
 
       {/* Same birthday */}
       <div className="chart-section">
-        <h2>{t.sameBirthdayTitle}</h2>
+        <h2>{subject.sameBirthdayTitle}</h2>
         <p className="chart-desc">{t.sameBirthdayDesc}</p>
         {sameBirthday.length === 0 ? (
-          <p className="no-players">{t.noBirthday}</p>
+          <p className="no-players">{subject.noBirthday}</p>
         ) : (
           <div className="player-list">
             <div className="player-list-header">
@@ -190,7 +208,7 @@ export default function Results({ result, onReset, t }) {
             {sameBirthday.map((p, i) => {
               const color = LEAGUE_COLORS[p.league] || "#6366f1";
               return (
-                <div key={p.name + p.birth} className="player-row birthday-row">
+                <div key={playerKey(p)} className="player-row birthday-row">
                   <span className="player-rank">{i + 1}</span>
                   {p.tmUrl
                     ? <a className="player-name player-stats-link" href={p.tmUrl} target="_blank" rel="noopener noreferrer">{p.name}</a>
@@ -216,8 +234,8 @@ export default function Results({ result, onReset, t }) {
 
       {/* League chart */}
       <div className="chart-section">
-        <h2>{t.olderByLeague}</h2>
-        <p className="chart-desc">{t.olderByLeagueDesc}</p>
+        <h2>{subject.olderByLeague}</h2>
+        <p className="chart-desc">{subject.olderByLeagueDesc}</p>
         <div className="chart-wrap">
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={byLeague} margin={{ top: 10, right: 20, left: 0, bottom: 60 }}>
@@ -236,7 +254,7 @@ export default function Results({ result, onReset, t }) {
       {/* Nationality chart */}
       <div className="chart-section">
         <h2>{t.topNationalities}</h2>
-        <p className="chart-desc">{t.topNationalitiesDesc}</p>
+        <p className="chart-desc">{subject.topNationalitiesDesc}</p>
         <div className="chart-wrap">
           <ResponsiveContainer width="100%" height={360}>
             <BarChart data={topNationalities} layout="vertical" margin={{ top: 10, right: 40, left: 110, bottom: 10 }}>
@@ -255,7 +273,7 @@ export default function Results({ result, onReset, t }) {
       {/* Age distribution */}
       <div className="chart-section">
         <h2>{t.ageDistTitle}</h2>
-        <p className="chart-desc">{t.ageDistDesc(total, userAge)}</p>
+        <p className="chart-desc">{subject.ageDistDesc(total, userAge)}</p>
         <div className="chart-wrap">
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={ageDistribution} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
@@ -268,7 +286,7 @@ export default function Results({ result, onReset, t }) {
                 formatter={v => [v, t.playersLabel]} labelFormatter={l => t.ageLabel(l)}
               />
               <ReferenceLine x={userAge} stroke="#10b981" strokeWidth={2} strokeDasharray="6 3"
-                label={{ value: t.youLabel, fill: "#10b981", fontSize: 13, position: "top" }} />
+                label={{ value: subject.marker, fill: "#10b981", fontSize: 13, position: "top" }} />
               <Bar dataKey="count" fill="#3b82f6" radius={[3, 3, 0, 0]} opacity={0.85} />
             </BarChart>
           </ResponsiveContainer>
@@ -281,7 +299,7 @@ export default function Results({ result, onReset, t }) {
         <div className="league-table">
           <div className="league-table-header">
             <span>{t.leagueCol}</span>
-            <span>{t.olderCol}</span>
+            <span>{subject.olderCol}</span>
             <span>{t.shareCol}</span>
           </div>
           {byLeague.map(row => {
@@ -297,7 +315,7 @@ export default function Results({ result, onReset, t }) {
                   <span className="pct-bar-bg">
                     <span className="pct-bar-fill" style={{ width: `${Math.min(100, Math.round((row.count / total) * 100 * 5))}%`, background: color }} />
                   </span>
-                  {Math.round((row.count / total) * 100)}%
+                  {t.percent(pct(row.count))}
                 </span>
               </div>
             );
