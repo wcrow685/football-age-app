@@ -304,7 +304,6 @@ button, select { font: inherit; }
 .share-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 .share-main { grid-column: span 3; }
 .share-social { grid-column: span 2; padding: 0 10px; }
-.share-native { grid-column: 1 / -1; }
 .share-social-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .panel { display: flex; flex-direction: column; gap: 16px; min-width: 0; padding: 24px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--turf); }
