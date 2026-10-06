@@ -1,7 +1,8 @@
 import { useState, useEffect, useEffectEvent, useId, lazy, Suspense } from "react";
 import { translations } from "./i18n";
 import { BALL_PATCHES, BALL_SEAMS } from "./ball";
-import { normalize, slugify, daysInMonth, isValidBirth, FAMOUS_PLAYERS, findFamous, isSamePlayer, closestTwin, assignSlugs } from "./players";
+import ClubSelect from "./components/ClubSelect";
+import { normalize, slugify, daysInMonth, isValidBirth, FAMOUS_PLAYERS, findFamous, isSamePlayer, closestTwin, assignSlugs, clubsByLeague } from "./players";
 import "./App.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
@@ -110,6 +111,7 @@ function computeResult(players, total, birthDate, famous) {
     twin,
     birthDate,
     famous,
+    players,
   };
 }
 
@@ -127,7 +129,18 @@ function readUrl() {
 
 const isTurkishPath = () => window.location.pathname === "/tr" || window.location.pathname.startsWith("/tr/");
 const basePath = () => (isTurkishPath() ? "/tr" : "/");
-const resultQuery = (birthDate, famous) => famous ? `?p=${slugify(famous.name)}` : `?d=${birthDate}`;
+// &c=fenerbahce adds the squad comparison ("your team")
+const resultQuery = (birthDate, famous, team) =>
+  (famous ? `?p=${slugify(famous.name)}` : `?d=${birthDate}`) + (team ? `&c=${team}` : "");
+const urlTeam = () => new URLSearchParams(window.location.search).get("c") || "";
+
+// The chosen team is a per-browser convenience; storage may be unavailable.
+function savedTeam() {
+  try { return localStorage.getItem("team") || ""; } catch { return ""; }
+}
+function saveTeam(slug) {
+  try { slug ? localStorage.setItem("team", slug) : localStorage.removeItem("team"); } catch { /* private mode */ }
+}
 
 export default function App() {
   const currentYear = new Date().getFullYear();
@@ -144,6 +157,9 @@ export default function App() {
   const [totalPlayers, setTotalPlayers] = useState(null);
   const [famousClubs, setFamousClubs] = useState({});
   const [oldest, setOldest] = useState(null);
+  const [clubs, setClubs]   = useState([]);
+  // A link's &c= wins over the team remembered in this browser.
+  const [team, setTeam]     = useState(() => urlTeam() || savedTeam());
   // /tr is the Turkish page; a shared link from a Turkish visitor carries &l=tr
   // (a saved choice wins there, but not over the /tr address itself).
   const [lang, setLang]     = useState(() =>
@@ -187,6 +203,7 @@ export default function App() {
           players.forEach(p => { clubs[famousKey(p.name, p.birth)] = p.club; });
           setFamousClubs(clubs);
           setOldest([...players].sort((a, b) => a.birth.localeCompare(b.birth)).slice(0, 3).map(p => `${p.name} (${p.club})`));
+          setClubs(clubsByLeague(players));
         })
         .catch(() => {});
     } else {
@@ -207,6 +224,7 @@ export default function App() {
   // Back/forward: show whatever the address bar now asks for.
   const onPopState = useEffectEvent(() => {
     const target = readUrl();
+    setTeam(urlTeam());
     if (target) {
       runComparison(target.birthDate, target.famous, { push: false });
     } else {
@@ -245,7 +263,7 @@ export default function App() {
       });
       const { players, total } = await Promise.race([loadPlayers(), timedOut]);
       setResult(computeResult(players, total, birthDate, famous));
-      if (push) window.history.pushState(null, "", basePath() + resultQuery(birthDate, famous));
+      if (push) window.history.pushState(null, "", basePath() + resultQuery(birthDate, famous, team));
       window.scrollTo(0, 0);
     } catch (err) {
       if (err.name === "AbortError") {
@@ -269,6 +287,12 @@ export default function App() {
 
   function handleFamousPlayer(player) {
     runComparison(player.birth, player);
+  }
+
+  function changeTeam(slug) {
+    setTeam(slug);
+    saveTeam(slug);
+    if (result) window.history.replaceState(null, "", basePath() + resultQuery(result.birthDate, result.famous, slug));
   }
 
   function handleReset() {
@@ -341,6 +365,11 @@ export default function App() {
                   </label>
                 </div>
 
+                <label className="ticket-team">
+                  {t.teamLabel}
+                  <ClubSelect clubs={clubs} value={team} onChange={changeTeam} noneLabel={t.teamNone} />
+                </label>
+
                 {error && <p className="error-msg" role="alert">{error}</p>}
 
                 <button type="submit" className="kickoff" disabled={loading}>
@@ -395,8 +424,11 @@ export default function App() {
             result={result}
             onReset={handleReset}
             t={t}
+            team={team}
+            clubs={clubs}
+            onTeamChange={changeTeam}
             // Shared links stay on "/" (the preview middleware matches it) and carry the language
-            shareUrl={`${SITE_URL}/${resultQuery(result.birthDate, result.famous)}${lang === "tr" ? "&l=tr" : ""}`}
+            shareUrl={`${SITE_URL}/${resultQuery(result.birthDate, result.famous, team)}${lang === "tr" ? "&l=tr" : ""}`}
           />
         </Suspense>
       )}

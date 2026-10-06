@@ -377,6 +377,32 @@ button, select { font: inherit; }
 
 .results-end { display: flex; justify-content: center; }
 
+/* ── Team (squad comparison) ─────────────────────────────────────────── */
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ticket-team { display: flex; flex-direction: column; gap: 6px; font-family: var(--label); font-weight: 700; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); }
+.ticket-team select,
+.team-picker select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 10px;
+  border-radius: 4px;
+  font-family: var(--body);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: pointer;
+}
+.ticket-team select { border: 2px solid var(--ink); background: #FFFFFF; color: var(--ink); }
+.team-picker { flex: 0 1 280px; min-width: 200px; }
+.team-picker select { border: 1px solid var(--line); background: var(--pitch); color: var(--chalk); }
+.team-score { font-size: 20px; font-weight: 600; color: var(--chalk); }
+.squad-row.is-you { background: rgba(255, 200, 61, 0.12); border-top-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); padding-inline: 10px; margin-inline: -10px; }
+.squad-row.is-you .squad-name, .squad-row.is-you .squad-age { color: var(--accent); font-weight: 700; text-transform: uppercase; font-family: var(--label); letter-spacing: 0.08em; }
+.muted-cell { color: var(--muted); }
+.team-full { align-self: flex-start; color: var(--accent); font-weight: 600; text-decoration: none; }
+.team-full:hover { text-decoration: underline; }
+
 /* ── Phones ──────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   body { font-size: 16px; }
