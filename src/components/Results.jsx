@@ -1,5 +1,12 @@
 import { useState } from "react";
 import { renderStoryCard, shareOrDownload } from "../storyCard";
+import { splitNames } from "../casing";
+
+// Uppercase headings in Turkish would turn "Messi" into "MESSİ"; mark the names
+// as English so text-transform keeps "MESSI" while Turkish words keep "İ".
+function Named({ text, names }) {
+  return splitNames(text, names).map((p, i) => (p.name ? <span key={i} lang="en">{p.text}</span> : p.text));
+}
 
 // Whole percentages hide small shares (23/5757 → "0%"), so show one decimal near 0 and 100.
 function formatPct(part, total, decimalSep, digits = 0) {
@@ -39,11 +46,11 @@ function PlayerName({ p }) {
     : <span>{p.name}</span>;
 }
 
-function Scoreboard({ older, younger, total, subject, t, fmt, pct }) {
+function Scoreboard({ older, younger, total, subject, names, t, fmt, pct }) {
   return (
     <section className="scoreboard" aria-label={subject.scoreHeader(fmt(total))}>
       <div className="scoreboard-top">
-        <span>{subject.scoreHeader(fmt(total))}</span>
+        <span><Named text={subject.scoreHeader(fmt(total))} names={names} /></span>
         <span className="accent">{t.scoreMeta}</span>
       </div>
       <div className="score">
@@ -93,7 +100,7 @@ function SharePanel({ older, younger, total, twin, famous, birthDate, subject, s
   async function downloadStory() {
     setDrawing(true);
     try {
-      const blob = await renderStoryCard({ older, younger, twin, t, subject });
+      const blob = await renderStoryCard({ older, younger, twin, t, subject, names: famous ? [famous.trFrom, famous.name] : [] });
       const name = famous ? famous.name.normalize("NFD").replace(/[^A-Za-z0-9]+/g, "-").toLowerCase() : birthDate;
       await shareOrDownload(blob, `older-than-me-${name}.png`, t.brand);
     } finally {
@@ -158,6 +165,7 @@ const ALL = "__all__";
 export default function Results({ result, onReset, t, shareUrl }) {
   const { older, olderPlayers, sameBirthday, total, byLeague, topNationalities, ageDistribution, userAge, younger, twin, birthDate, famous } = result;
   const subject = famous ? t.them(famous) : t.me;
+  const names = famous ? [famous.trFrom, famous.name] : [];
   const fmt = n => n.toLocaleString(t.locale);
   const pct = (n, digits) => formatPct(n, total, t.decimalSep, digits);
 
@@ -173,11 +181,11 @@ export default function Results({ result, onReset, t, shareUrl }) {
   return (
     <main className="wrap results">
       <div className="context-bar">
-        <span>{subject.context(longDate(birthDate, t.months), userAge)}</span>
+        <span><Named text={subject.context(longDate(birthDate, t.months), userAge)} names={names} /></span>
         <button type="button" className="btn btn-pill" onClick={onReset}>{t.changeDate}</button>
       </div>
 
-      <Scoreboard older={older} younger={younger} total={total} subject={subject} t={t} fmt={fmt} pct={pct} />
+      <Scoreboard older={older} younger={younger} total={total} subject={subject} names={names} t={t} fmt={fmt} pct={pct} />
 
       <div className="grid-2">
         {twin && <TwinCard twin={twin} subject={subject} t={t} />}
@@ -190,7 +198,7 @@ export default function Results({ result, onReset, t, shareUrl }) {
       <div className="grid-2 grid-top">
         <section className="panel">
           <div className="panel-head">
-            <h2>{subject.olderTitle(fmt(older))}</h2>
+            <h2><Named text={subject.olderTitle(fmt(older))} names={names} /></h2>
             <span>{t.sortedOldest}</span>
           </div>
 
@@ -266,7 +274,7 @@ export default function Results({ result, onReset, t, shareUrl }) {
           <div className="age-chart" role="img" aria-label={subject.ageDistDesc(fmt(total), userAge)} style={{ gridTemplateColumns: `repeat(${ageDistribution.length}, minmax(0, 1fr))` }}>
             {ageDistribution.map(a => (
               <div key={a.age} className="age-col" title={`${t.colAge} ${a.age}: ${a.count}`}>
-                <span className="age-marker">{a.age === userAge ? subject.marker : ""}</span>
+                <span className="age-marker" lang="en">{a.age === userAge ? subject.marker : ""}</span>
                 <span className="age-track">
                   <span
                     className={`age-bar${a.age === userAge ? " is-you" : a.age > userAge ? " is-older" : ""}`}
@@ -283,7 +291,7 @@ export default function Results({ result, onReset, t, shareUrl }) {
       <div className="grid-2 grid-top">
         <section className="panel panel-outline">
           <div className="panel-head">
-            <h2>{subject.sameBirthdayTitle}</h2>
+            <h2><Named text={subject.sameBirthdayTitle} names={names} /></h2>
           </div>
           {sameBirthday.length === 0 ? (
             <p className="empty">{subject.noBirthday}</p>

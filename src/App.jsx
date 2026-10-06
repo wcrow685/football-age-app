@@ -358,7 +358,8 @@ export default function App() {
 
           <section className="league-strip" aria-label={t.leaguesLabel}>
             <div className="wrap league-strip-inner">
-              {LEAGUES.map(l => <a key={l} href={`/league/${slugify(l)}`}>{l}</a>)}
+              {/* Names keep English casing in Turkish (no "LİGUE"); Süper Lig is Turkish itself */}
+              {LEAGUES.map(l => <a key={l} href={`/league/${slugify(l)}`} lang={l === "Süper Lig" ? "tr" : "en"}>{l}</a>)}
             </div>
           </section>
 
@@ -371,8 +372,8 @@ export default function App() {
               {famousPlayers.map(p => (
                 <button key={p.name} type="button" className="star-card" onClick={() => handleFamousPlayer(p)} disabled={loading}>
                   <span className="star-year" aria-hidden="true">{p.birth.slice(2, 4)}</span>
-                  <span className="star-club">{famousClubs[famousKey(p.name, p.birth)] || "\u00a0"}</span>
-                  <span className="star-name">{p.name}</span>
+                  <span className="star-club" lang="en">{famousClubs[famousKey(p.name, p.birth)] || "\u00a0"}</span>
+                  <span className="star-name" lang="en">{p.name}</span>
                   <span className="star-born">{t.bornOn(formatBirth(p.birth, t.months))}</span>
                 </button>
               ))}

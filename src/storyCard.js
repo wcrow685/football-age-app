@@ -1,5 +1,6 @@
 // Draws the 1080×1920 share card (Instagram/WhatsApp story) on a canvas.
 import { BALL_PATCHES, BALL_SEAMS } from "./ball";
+import { upperMixed } from "./casing";
 
 const W = 1080;
 const H = 1920;
@@ -92,16 +93,17 @@ async function loadFonts() {
  * @param {object|null} p.twin closest-age player ({ name, club, league, days })
  * @param {object} p.t        translations for the current language
  * @param {object} p.subject  t.me or t.them(famous)
+ * @param {string[]} [p.names] the famous player's name forms, uppercased with English rules
  * @returns {Promise<Blob>}
  */
-export async function renderStoryCard({ older, younger, twin, t, subject }) {
+export async function renderStoryCard({ older, younger, twin, t, subject, names = [] }) {
   await loadFonts();
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d");
   const fmt = n => n.toLocaleString(t.locale);
-  const upper = s => s.toLocaleUpperCase(t.locale);
+  const upper = s => upperMixed(s, names, t.locale);
 
   // Ground and pitch markings
   ctx.fillStyle = C.pitch;

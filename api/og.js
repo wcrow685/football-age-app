@@ -7,6 +7,7 @@ import { ImageResponse } from "@vercel/og";
 import { score } from "../src/players.js";
 import { readShareParams, shareCopy, formatNumber } from "../src/shareCopy.js";
 import { BALL_PATCHES, BALL_SEAMS } from "../src/ball.js";
+import { upperMixed } from "../src/casing.js";
 
 // Node.js runtime: the edge runtime refuses to compile @vercel/og's wasm
 // ("Wasm code generation disallowed by embedder").
@@ -62,7 +63,8 @@ export async function GET(request) {
   const { lang, famous, birthDate } = share;
   const s = score(data.players, birthDate, famous);
   const copy = shareCopy(lang, s, famous, birthDate);
-  const up = str => str.toLocaleUpperCase(lang === "tr" ? "tr-TR" : "en-US");
+  // Names keep English casing in Turkish ("MESSI", not "MESSİ")
+  const up = str => upperMixed(str, famous ? [famous.trFrom, famous.name] : [], lang === "tr" ? "tr-TR" : "en-US");
   const n = x => formatNumber(x, lang);
   const label = { fontFamily: "Barlow Condensed", fontSize: 26, letterSpacing: 3 };
 
