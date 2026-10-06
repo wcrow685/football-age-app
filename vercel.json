@@ -32,5 +32,10 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/og.js": {
+      "includeFiles": "{public/players.json,public/fonts/**}"
+    }
+  }
 }
