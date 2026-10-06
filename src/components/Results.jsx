@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { renderStoryCard, shareOrDownload } from "../storyCard";
 import { splitNames } from "../casing";
+import { isSamePlayer } from "../players";
+import ClubSelect from "./ClubSelect";
 
 // Uppercase headings in Turkish would turn "Messi" into "MESSİ"; mark the names
 // as English so text-transform keeps "MESSI" while Turkish words keep "İ".
@@ -159,11 +161,72 @@ function BrandIcon({ name }) {
   );
 }
 
+// Squad comparison: the chosen club's players oldest first, with the subject
+// slotted in by birth date.
+function TeamPanel({ team, clubs, onTeamChange, players, birthDate, famous, userAge, subject, names, t }) {
+  const squad = team
+    ? players.filter(p => p.clubSlug === team && !isSamePlayer(p, famous)).sort((a, b) => a.birth.localeCompare(b.birth))
+    : [];
+  const clubName = squad[0]?.club ?? clubs.flatMap(g => g.clubs).find(c => c.slug === team)?.name;
+  const older = squad.filter(p => p.birth < birthDate).length;
+  const younger = squad.filter(p => p.birth > birthDate).length;
+  const youRow = { you: true };
+  const rows = [...squad.slice(0, older), youRow, ...squad.slice(older)];
+
+  return (
+    <section className="panel team-panel">
+      <div className="panel-head">
+        <h2><Named text={subject.teamTitle} names={names} /></h2>
+        <label className="team-picker">
+          <span className="visually-hidden">{t.teamLabel}</span>
+          <ClubSelect clubs={clubs} value={team} onChange={onTeamChange} noneLabel={t.teamNone} />
+        </label>
+      </div>
+
+      {!squad.length ? (
+        <p className="empty">{t.teamPick}</p>
+      ) : (
+        <>
+          <p className="team-score">
+            {older === 0 ? subject.teamOldest
+              : younger === 0 ? subject.teamYoungest
+              : subject.teamScore(older, squad.length, clubName)}
+          </p>
+          <div className="squad" role="table" aria-label={clubName}>
+            <div className="squad-row squad-head" role="row">
+              <span role="columnheader">{t.colPlayer}</span>
+              <span role="columnheader">{t.colPosition}</span>
+              <span role="columnheader" className="squad-age">{t.colAge}</span>
+              <span role="columnheader" className="squad-born">{t.colBorn}</span>
+            </div>
+            {rows.map(p => p.you ? (
+              <div key="you" className="squad-row is-you" role="row">
+                <span role="cell" className="squad-name" lang="en">{subject.marker}</span>
+                <span role="cell" className="squad-club" />
+                <span role="cell" className="squad-age">{userAge}</span>
+                <span role="cell" className="squad-born">{shortDate(birthDate, t.months)}</span>
+              </div>
+            ) : (
+              <div key={playerKey(p)} className="squad-row" role="row">
+                <span role="cell" className="squad-name"><PlayerName p={p} /></span>
+                <span role="cell" className="squad-club muted-cell">{t.positions[p.position] || p.position}</span>
+                <span role="cell" className="squad-age">{playerAge(p.birth)}</span>
+                <span role="cell" className="squad-born">{shortDate(p.birth, t.months)}</span>
+              </div>
+            ))}
+          </div>
+          <a className="team-full" href={`/club/${team}`}>{t.teamFull(clubName)}</a>
+        </>
+      )}
+    </section>
+  );
+}
+
 // Language-independent sentinel so the "All" tab survives a language switch
 const ALL = "__all__";
 
-export default function Results({ result, onReset, t, shareUrl }) {
-  const { older, olderPlayers, sameBirthday, total, byLeague, topNationalities, ageDistribution, userAge, younger, twin, birthDate, famous } = result;
+export default function Results({ result, onReset, t, shareUrl, team, clubs, onTeamChange }) {
+  const { older, olderPlayers, sameBirthday, total, byLeague, topNationalities, ageDistribution, userAge, younger, twin, birthDate, famous, players } = result;
   const subject = famous ? t.them(famous) : t.me;
   const names = famous ? [famous.trFrom, famous.name] : [];
   const fmt = n => n.toLocaleString(t.locale);
@@ -194,6 +257,11 @@ export default function Results({ result, onReset, t, shareUrl }) {
           birthDate={birthDate} subject={subject} shareUrl={shareUrl} t={t}
         />
       </div>
+
+      <TeamPanel
+        team={team} clubs={clubs} onTeamChange={onTeamChange} players={players}
+        birthDate={birthDate} famous={famous} userAge={userAge} subject={subject} names={names} t={t}
+      />
 
       <div className="grid-2 grid-top">
         <section className="panel">

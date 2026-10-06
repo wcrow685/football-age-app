@@ -29,13 +29,33 @@ export const FAMOUS_PLAYERS = [
   { name: "Arda Güler",        birth: "2005-02-25", trFrom: "Arda Güler'den", turkish: true },
 ];
 
-// Page slug for every player (/player/<slug>). Shared names (two Luis Suárez)
-// all get the club appended so no one owns the bare slug. Mutates and returns.
+// Page slugs for every player (/player/<slug>) and club (/club/<clubSlug>).
+// Shared names (two Luis Suárez) all get the club appended so no one owns the
+// bare slug. Mutates and returns.
 export function assignSlugs(players) {
   const count = {};
   players.forEach(p => { const s = slugify(p.name); count[s] = (count[s] || 0) + 1; });
-  players.forEach(p => { const s = slugify(p.name); p.slug = count[s] > 1 ? `${s}-${slugify(p.club)}` : s; });
+  players.forEach(p => {
+    const s = slugify(p.name);
+    p.clubSlug = slugify(p.club);
+    p.slug = count[s] > 1 ? `${s}-${p.clubSlug}` : s;
+  });
   return players;
+}
+
+// [{ league, clubs: [{ slug, name }] }], leagues and clubs alphabetical — for club pickers.
+export function clubsByLeague(players) {
+  const leagues = new Map();
+  for (const p of players) {
+    if (!leagues.has(p.league)) leagues.set(p.league, new Map());
+    leagues.get(p.league).set(p.clubSlug ?? slugify(p.club), p.club);
+  }
+  return [...leagues.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([league, clubs]) => ({
+      league,
+      clubs: [...clubs.entries()].map(([slug, name]) => ({ slug, name })).sort((a, b) => a.name.localeCompare(b.name)),
+    }));
 }
 
 export const findFamous = slug => FAMOUS_PLAYERS.find(p => slugify(p.name) === slug);
