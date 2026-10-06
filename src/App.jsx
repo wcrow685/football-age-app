@@ -1,5 +1,6 @@
 import { useState, useEffect, useEffectEvent, useId, lazy, Suspense } from "react";
 import { translations } from "./i18n";
+import { BALL_PATCHES, BALL_SEAMS } from "./ball";
 import "./App.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
@@ -36,11 +37,6 @@ function formatBirth(birth, months) {
 }
 
 const famousKey = (name, birth) => `${normalize(name)}|${birth}`;
-
-// Classic ball: dark centre pentagon and rim patches clipped by the circle,
-// joined by hexagon seams (the earlier hollow outline read as a wheel rim).
-const BALL_PATCHES = "M50 35L64.3 45.4L58.8 62.1L41.2 62.1L35.7 45.4Z M50 21L35.7 10.6L41.2 -6.1L58.8 -6.1L64.3 10.6Z M77.6 41L83 24.3L100.7 24.3L106.1 41L91.8 51.4Z M67 73.5L84.7 73.5L90.1 90.2L75.9 100.6L61.6 90.2Z M33 73.5L38.4 90.2L24.1 100.6L9.9 90.2L15.3 73.5Z M22.4 41L8.2 51.4L-6.1 41L-0.7 24.3L17 24.3Z";
-const BALL_SEAMS = "M50 35L50 21 M64.3 45.4L77.6 41 M58.8 62.1L67 73.5 M41.2 62.1L33 73.5 M35.7 45.4L22.4 41 M64.3 10.6L83 24.3 M91.8 51.4L84.7 73.5 M61.6 90.2L38.4 90.2 M15.3 73.5L8.2 51.4 M17 24.3L35.7 10.6";
 
 function BallIcon({ size = 34 }) {
   const clipId = useId();

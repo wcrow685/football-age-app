@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { renderStoryCard, shareOrDownload } from "../storyCard";
 
 // Whole percentages hide small shares (23/5757 → "0%"), so show one decimal near 0 and 100.
 function formatPct(part, total, decimalSep, digits = 0) {
@@ -85,8 +86,20 @@ function TwinCard({ twin, subject, t }) {
   );
 }
 
-function SharePanel({ older, total, famous, shareUrl, t }) {
+function SharePanel({ older, younger, total, twin, famous, birthDate, subject, shareUrl, t }) {
   const [copied, setCopied] = useState(false);
+  const [drawing, setDrawing] = useState(false);
+
+  async function downloadStory() {
+    setDrawing(true);
+    try {
+      const blob = await renderStoryCard({ older, younger, twin, t, subject });
+      const name = famous ? famous.name.normalize("NFD").replace(/[^A-Za-z0-9]+/g, "-").toLowerCase() : birthDate;
+      await shareOrDownload(blob, `older-than-me-${name}.png`, t.brand);
+    } finally {
+      setDrawing(false);
+    }
+  }
   const shareText = t.shareText(older, total, famous);
   const xUrl  = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
   const waUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
@@ -103,7 +116,11 @@ function SharePanel({ older, total, famous, shareUrl, t }) {
     <div className="share">
       <span className="eyebrow">{t.shareResult}</span>
       <div className="share-row">
-        <button type="button" className="btn btn-accent" onClick={copy}>
+        <button type="button" className="btn btn-accent" onClick={downloadStory} disabled={drawing}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14" /></svg>
+          <span aria-live="polite">{drawing ? t.storyBusy : t.storyCard}</span>
+        </button>
+        <button type="button" className="btn" onClick={copy}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1" /><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1" /></svg>
           <span aria-live="polite">{copied ? t.copied : t.copyLink}</span>
         </button>
@@ -144,7 +161,10 @@ export default function Results({ result, onReset, t, shareUrl }) {
 
       <div className="grid-2">
         {twin && <TwinCard twin={twin} subject={subject} t={t} />}
-        <SharePanel older={older} total={total} famous={famous} shareUrl={shareUrl} t={t} />
+        <SharePanel
+          older={older} younger={younger} total={total} twin={twin} famous={famous}
+          birthDate={birthDate} subject={subject} shareUrl={shareUrl} t={t}
+        />
       </div>
 
       <div className="grid-2 grid-top">
