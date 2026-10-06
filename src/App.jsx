@@ -1,6 +1,7 @@
 import { useState, useEffect, useEffectEvent, useId, lazy, Suspense } from "react";
 import { translations } from "./i18n";
 import { BALL_PATCHES, BALL_SEAMS } from "./ball";
+import { normalize, slugify, daysInMonth, isValidBirth, FAMOUS_PLAYERS, findFamous, isSamePlayer, closestTwin } from "./players";
 import "./App.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
@@ -26,9 +27,6 @@ function loadPlayers() {
   return playersPromise;
 }
 
-// "Kenan Yıldız" and "Kenan Yildiz" (as the data spells it) should match.
-const normalize = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ı/g, "i").toLowerCase();
-const slugify   = s => normalize(s).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 // First three letters give the standard short month in both languages (Jun / Haz).
 function formatBirth(birth, months) {
@@ -53,18 +51,13 @@ function BallIcon({ size = 34 }) {
   );
 }
 
-function daysInMonth(month, year) {
-  return new Date(year, month, 0).getDate();
-}
-
 const YEAR_MS = 365.25 * 24 * 3600 * 1000;
-const DAY_MS  = 24 * 3600 * 1000;
 
 // `famous` is the famous player being compared, or undefined when it's the visitor.
 function computeResult(players, total, birthDate, famous) {
   const userDate = new Date(birthDate);
   const today    = new Date();
-  const isFamous = p => famous && p.birth === famous.birth && normalize(p.name) === normalize(famous.name);
+  const isFamous = p => isSamePlayer(p, famous);
 
   const olderPlayers = players
     .filter(p => new Date(p.birth) < userDate)
@@ -99,13 +92,7 @@ function computeResult(players, total, birthDate, famous) {
 
   const younger = players.filter(p => new Date(p.birth) > userDate).length;
 
-  // Closest birth date in either direction; `days` > 0 means the twin was born later.
-  let twin = null;
-  for (const p of players) {
-    if (isFamous(p)) continue;
-    const days = Math.round((new Date(p.birth) - userDate) / DAY_MS);
-    if (!twin || Math.abs(days) < Math.abs(twin.days)) twin = { ...p, days };
-  }
+  const twin = closestTwin(players, birthDate, famous);
 
   return {
     older: olderPlayers.length,
@@ -125,33 +112,13 @@ function computeResult(players, total, birthDate, famous) {
   };
 }
 
-const FAMOUS_PLAYERS = [
-  { name: "Lionel Messi",      birth: "1987-06-24", trFrom: "Lionel Messi'den" },
-  { name: "Cristiano Ronaldo", birth: "1985-02-05", trFrom: "Cristiano Ronaldo'dan" },
-  { name: "Kylian Mbappé",     birth: "1998-12-20", trFrom: "Kylian Mbappé'den" },
-  { name: "Erling Haaland",    birth: "2000-07-21", trFrom: "Erling Haaland'dan" },
-  { name: "Vinicius Junior",   birth: "2000-07-12", trFrom: "Vinicius Junior'dan" },
-  { name: "Jude Bellingham",   birth: "2003-06-29", trFrom: "Jude Bellingham'dan" },
-  { name: "Mohamed Salah",     birth: "1992-06-15", trFrom: "Mohamed Salah'tan" },
-  { name: "Lamine Yamal",      birth: "2007-07-13", trFrom: "Lamine Yamal'dan" },
-  { name: "Harry Kane",        birth: "1993-07-28", trFrom: "Harry Kane'den" },
-  { name: "Pedri",             birth: "2002-11-25", trFrom: "Pedri'den" },
-  { name: "Rodri",             birth: "1996-06-22", trFrom: "Rodri'den" },
-  { name: "Arda Güler",        birth: "2005-02-25", trFrom: "Arda Güler'den", turkish: true },
-];
 
 const LEAGUES = ["Premier League", "La Liga", "Bundesliga", "Serie A", "Ligue 1", "Eredivisie", "Liga Portugal", "Süper Lig", "Saudi Pro League", "MLS"];
-
-function isValidBirth(d) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
-  const [y, m, day] = d.split("-").map(Number);
-  return y >= 1940 && m >= 1 && m <= 12 && day >= 1 && day <= daysInMonth(m, y) && new Date(d) <= new Date();
-}
 
 // ?p=lionel-messi for a famous player, ?d=1995-03-14 for a birth date.
 function readUrl() {
   const q = new URLSearchParams(window.location.search);
-  const famous = FAMOUS_PLAYERS.find(p => slugify(p.name) === q.get("p"));
+  const famous = findFamous(q.get("p"));
   if (famous) return { birthDate: famous.birth, famous };
   const d = q.get("d");
   return d && isValidBirth(d) ? { birthDate: d } : null;
@@ -174,7 +141,9 @@ export default function App() {
   const [totalPlayers, setTotalPlayers] = useState(null);
   const [famousClubs, setFamousClubs] = useState({});
   const [oldest, setOldest] = useState(null);
-  const [lang, setLang]     = useState(() => localStorage.getItem("lang") || "en");
+  // A shared link from a Turkish visitor carries &l=tr; a saved choice still wins.
+  const [lang, setLang]     = useState(() =>
+    localStorage.getItem("lang") || (new URLSearchParams(window.location.search).get("l") === "tr" ? "tr" : "en"));
 
   const t = translations[lang];
 
@@ -415,7 +384,7 @@ export default function App() {
             result={result}
             onReset={handleReset}
             t={t}
-            shareUrl={SITE_URL + resultPath(result.birthDate, result.famous)}
+            shareUrl={SITE_URL + resultPath(result.birthDate, result.famous) + (lang === "tr" ? "&l=tr" : "")}
           />
         </Suspense>
       )}

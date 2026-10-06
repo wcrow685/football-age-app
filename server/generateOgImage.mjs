@@ -6,7 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const fonts = path.join(__dirname, "fonts");
+const fonts = path.join(__dirname, "../public/fonts");
 registerFont(path.join(fonts, "Anton-Regular.ttf"), { family: "Anton" });
 registerFont(path.join(fonts, "BarlowCondensed-Bold.ttf"), { family: "Barlow Condensed", weight: "bold" });
 registerFont(path.join(fonts, "Barlow-Medium.ttf"), { family: "Barlow", weight: "500" });
