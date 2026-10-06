@@ -86,6 +86,10 @@ function TwinCard({ twin, subject, t }) {
   );
 }
 
+// Phones with a native share sheet hand the link to WhatsApp & co. as a real
+// URL, which gets a link preview; wa.me's prefilled text often doesn't.
+const canNativeShare = () => typeof navigator.share === "function" && window.matchMedia?.("(pointer: coarse)").matches;
+
 function SharePanel({ older, younger, total, twin, famous, birthDate, subject, shareUrl, t }) {
   const [copied, setCopied] = useState(false);
   const [drawing, setDrawing] = useState(false);
@@ -102,8 +106,12 @@ function SharePanel({ older, younger, total, twin, famous, birthDate, subject, s
   }
   const shareText = t.shareText(older, total, famous);
   const xUrl  = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
-  const waUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`;
   const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+
+  function nativeShare() {
+    navigator.share({ title: t.brand, text: shareText, url: shareUrl }).catch(() => {});
+  }
 
   function copy() {
     navigator.clipboard?.writeText(shareUrl).then(() => {
@@ -124,15 +132,24 @@ function SharePanel({ older, younger, total, twin, famous, birthDate, subject, s
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1" /><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1" /></svg>
           <span aria-live="polite">{copied ? t.copied : t.copyLink}</span>
         </button>
-        <a className="btn share-social" href={waUrl} target="_blank" rel="noopener noreferrer" aria-label={t.whatsapp}>
-          <BrandIcon name="whatsapp" /><span className="share-social-label">WhatsApp</span>
-        </a>
-        <a className="btn share-social" href={xUrl} target="_blank" rel="noopener noreferrer" aria-label={t.shareOnX}>
-          <BrandIcon name="x" /><span className="share-social-label">X</span>
-        </a>
-        <a className="btn share-social" href={fbUrl} target="_blank" rel="noopener noreferrer" aria-label={t.facebook}>
-          <BrandIcon name="facebook" /><span className="share-social-label">Facebook</span>
-        </a>
+        {canNativeShare() ? (
+          <button type="button" className="btn share-main share-native" onClick={nativeShare}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v13M7 8l5-5 5 5M5 14v5a2 2 0 002 2h10a2 2 0 002-2v-5" /></svg>
+            {t.shareNative}
+          </button>
+        ) : (
+          <>
+            <a className="btn share-social" href={waUrl} target="_blank" rel="noopener noreferrer" aria-label={t.whatsapp}>
+              <BrandIcon name="whatsapp" /><span className="share-social-label">WhatsApp</span>
+            </a>
+            <a className="btn share-social" href={xUrl} target="_blank" rel="noopener noreferrer" aria-label={t.shareOnX}>
+              <BrandIcon name="x" /><span className="share-social-label">X</span>
+            </a>
+            <a className="btn share-social" href={fbUrl} target="_blank" rel="noopener noreferrer" aria-label={t.facebook}>
+              <BrandIcon name="facebook" /><span className="share-social-label">Facebook</span>
+            </a>
+          </>
+        )}
       </div>
     </div>
   );
