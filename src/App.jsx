@@ -164,7 +164,10 @@ export default function App() {
     if (Number(day) > max) setDay(String(max));
   }
 
-  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.title = translations[lang].pageTitle;
+  }, [lang]);
 
   function changeLang(next) {
     setLang(next);
