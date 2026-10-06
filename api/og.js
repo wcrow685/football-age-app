@@ -1,6 +1,8 @@
 // GET /api/og?d=1995-03-14 (or ?p=lionel-messi, &l=tr) → 1200×630 PNG link
 // preview showing that result's scoreline. Invalid params fall back to the
 // static og-image.png.
+import fs from "fs/promises";
+import path from "path";
 import { ImageResponse } from "@vercel/og";
 import { score } from "../src/players.js";
 import { readShareParams, shareCopy, formatNumber } from "../src/shareCopy.js";
@@ -20,23 +22,42 @@ const BALL_SRC = `data:image/svg+xml;base64,${btoa(BALL_SVG)}`;
 const box = (style, ...children) => ({ type: "div", props: { style: { display: "flex", ...style }, children } });
 const text = (style, value) => ({ type: "div", props: { style: { display: "flex", ...style }, children: value } });
 
-async function font(origin, file) {
-  const res = await fetch(new URL(`/fonts/${file}`, origin));
-  if (!res.ok) throw new Error(`font ${file}: ${res.status}`);
-  return res.arrayBuffer();
+// Read from the function bundle (vercel.json includeFiles); fetching our own
+// origin fails on password-protected preview deployments and costs a round trip.
+async function asset(origin, rel) {
+  try {
+    return await fs.readFile(path.join(process.cwd(), "public", rel));
+  } catch {
+    const res = await fetch(new URL(`/${rel}`, origin));
+    if (!res.ok) throw new Error(`${rel}: ${res.status}`);
+    return Buffer.from(await res.arrayBuffer());
+  }
 }
+
+const fallback = (url, err) => {
+  console.error("og render failed", err);
+  return new Response(null, {
+    status: 302,
+    headers: { location: new URL("/og-image.png", url).toString(), "x-og-error": String(err?.message || err).slice(0, 200) },
+  });
+};
 
 export async function GET(request) {
   const url = new URL(request.url);
   const share = readShareParams(url.searchParams);
   if (!share) return Response.redirect(new URL("/og-image.png", url), 302);
 
-  const [data, anton, condensed, barlow] = await Promise.all([
-    fetch(new URL("/players.json", url)).then(r => r.json()),
-    font(url, "Anton-Regular.ttf"),
-    font(url, "BarlowCondensed-Bold.ttf"),
-    font(url, "Barlow-Medium.ttf"),
-  ]);
+  let data, anton, condensed, barlow;
+  try {
+    [data, anton, condensed, barlow] = await Promise.all([
+      asset(url, "players.json").then(b => JSON.parse(b.toString("utf8"))),
+      asset(url, "fonts/Anton-Regular.ttf"),
+      asset(url, "fonts/BarlowCondensed-Bold.ttf"),
+      asset(url, "fonts/Barlow-Medium.ttf"),
+    ]);
+  } catch (err) {
+    return fallback(url, err);
+  }
 
   const { lang, famous, birthDate } = share;
   const s = score(data.players, birthDate, famous);
@@ -93,10 +114,6 @@ export async function GET(request) {
       },
     });
   } catch (err) {
-    console.error("og render failed", err);
-    return new Response(null, {
-      status: 302,
-      headers: { location: new URL("/og-image.png", url).toString(), "x-og-error": String(err?.message || err).slice(0, 200) },
-    });
+    return fallback(url, err);
   }
 }

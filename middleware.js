@@ -25,7 +25,8 @@ export default async function middleware(request) {
     if (!share) return;
 
     const [htmlRes, dataRes] = await Promise.all([
-      fetch(new URL("/index.html", url)),
+      // "/" without the query: this middleware passes it through to the static shell
+      fetch(new URL("/", url)),
       fetch(new URL("/players.json", url)),
     ]);
     if (!htmlRes.ok || !dataRes.ok) return;

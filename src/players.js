@@ -29,6 +29,15 @@ export const FAMOUS_PLAYERS = [
   { name: "Arda Güler",        birth: "2005-02-25", trFrom: "Arda Güler'den", turkish: true },
 ];
 
+// Page slug for every player (/player/<slug>). Shared names (two Luis Suárez)
+// all get the club appended so no one owns the bare slug. Mutates and returns.
+export function assignSlugs(players) {
+  const count = {};
+  players.forEach(p => { const s = slugify(p.name); count[s] = (count[s] || 0) + 1; });
+  players.forEach(p => { const s = slugify(p.name); p.slug = count[s] > 1 ? `${s}-${slugify(p.club)}` : s; });
+  return players;
+}
+
 export const findFamous = slug => FAMOUS_PLAYERS.find(p => slugify(p.name) === slug);
 
 // Is data row `p` the famous player being compared?

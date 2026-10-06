@@ -217,6 +217,8 @@ button, select { font: inherit; }
 /* ── League strip ────────────────────────────────────────────────────── */
 .league-strip { border-block: 1px solid var(--line-soft); background: var(--pitch-2); }
 .league-strip-inner { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 28px; padding-block: 18px; font-size: 16px; letter-spacing: 0.1em; color: var(--muted); }
+.league-strip-inner a { color: var(--muted); text-decoration: none; }
+.league-strip-inner a:hover { color: var(--accent); }
 
 /* ── Stars ───────────────────────────────────────────────────────────── */
 .stars { display: flex; flex-direction: column; gap: 28px; padding-block: 72px; }

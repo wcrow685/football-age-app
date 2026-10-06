@@ -10,6 +10,7 @@ export const translations = {
 
     // Header
     brand: "Older Than Me?",
+    pageTitle: "How Many Football Players Are Older Than Me?",
     langLabel: "Language",
 
     // Home
@@ -120,6 +121,7 @@ export const translations = {
 
     // Header
     brand: "Benden Yaşlı mı?",
+    pageTitle: "Kaç Futbolcu Benden Yaşlı?",
     langLabel: "Dil",
 
     // Home
