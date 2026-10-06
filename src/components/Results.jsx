@@ -3,6 +3,7 @@ import { renderStoryCard, shareOrDownload } from "../storyCard";
 import { splitNames } from "../casing";
 import { isSamePlayer, nameLang } from "../players";
 import ClubSelect from "./ClubSelect";
+import { track } from "../analytics";
 
 // Uppercase headings in Turkish would turn "Messi" into "MESSİ"; mark the names
 // as English so text-transform keeps "MESSI" while Turkish words keep "İ".
@@ -98,7 +99,10 @@ function SharePanel({ older, younger, total, twin, famous, birthDate, subject, s
   const [copied, setCopied] = useState(false);
   const [drawing, setDrawing] = useState(false);
 
+  const shared = method => track("share", { method, content_type: famous ? "famous" : "result" });
+
   async function downloadStory() {
+    shared("story_card");
     setDrawing(true);
     try {
       const blob = await renderStoryCard({ older, younger, twin, t, subject, names: famous ? [famous.trFrom, famous.name] : [] });
@@ -114,6 +118,7 @@ function SharePanel({ older, younger, total, twin, famous, birthDate, subject, s
   const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
 
   function copy() {
+    shared("copy_link");
     navigator.clipboard?.writeText(shareUrl).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -132,13 +137,13 @@ function SharePanel({ older, younger, total, twin, famous, birthDate, subject, s
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1" /><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1" /></svg>
           <span aria-live="polite">{copied ? t.copied : t.copyLink}</span>
         </button>
-        <a className="btn share-social" href={waUrl} target="_blank" rel="noopener noreferrer" aria-label={t.whatsapp}>
+        <a className="btn share-social" href={waUrl} target="_blank" rel="noopener noreferrer" aria-label={t.whatsapp} onClick={() => shared("whatsapp")}>
           <BrandIcon name="whatsapp" /><span className="share-social-label">WhatsApp</span>
         </a>
-        <a className="btn share-social" href={xUrl} target="_blank" rel="noopener noreferrer" aria-label={t.shareOnX}>
+        <a className="btn share-social" href={xUrl} target="_blank" rel="noopener noreferrer" aria-label={t.shareOnX} onClick={() => shared("x")}>
           <BrandIcon name="x" /><span className="share-social-label">X</span>
         </a>
-        <a className="btn share-social" href={fbUrl} target="_blank" rel="noopener noreferrer" aria-label={t.facebook}>
+        <a className="btn share-social" href={fbUrl} target="_blank" rel="noopener noreferrer" aria-label={t.facebook} onClick={() => shared("facebook")}>
           <BrandIcon name="facebook" /><span className="share-social-label">Facebook</span>
         </a>
       </div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useEffectEvent, useId, lazy, Suspense } from "reac
 import { translations } from "./i18n";
 import { BALL_PATCHES, BALL_SEAMS } from "./ball";
 import ClubSelect from "./components/ClubSelect";
+import { track } from "./analytics";
 import { normalize, slugify, daysInMonth, isValidBirth, FAMOUS_PLAYERS, findFamous, isSamePlayer, closestTwin, assignSlugs, clubsByLeague } from "./players";
 import "./App.css";
 
@@ -263,6 +264,8 @@ export default function App() {
       });
       const { players, total } = await Promise.race([loadPlayers(), timedOut]);
       setResult(computeResult(players, total, birthDate, famous));
+      // from_link: opened from a shared URL or back/forward rather than a click here
+      track("compare", { method: famous ? "famous" : "date", famous: famous?.name, has_team: !!team, from_link: !push, language: lang });
       if (push) window.history.pushState(null, "", basePath() + resultQuery(birthDate, famous, team));
       window.scrollTo(0, 0);
     } catch (err) {
@@ -290,6 +293,7 @@ export default function App() {
   }
 
   function changeTeam(slug) {
+    if (slug) track("select_team", { club: slug, where: result ? "results" : "home" });
     setTeam(slug);
     saveTeam(slug);
     if (result) window.history.replaceState(null, "", basePath() + resultQuery(result.birthDate, result.famous, slug));
