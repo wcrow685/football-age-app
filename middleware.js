@@ -8,6 +8,15 @@ import { readShareParams, shareCopy } from "./src/shareCopy.js";
 
 export const config = { matcher: "/" };
 
+// Only link-preview fetchers and search engines read these tags; real visitors
+// get the static page at once (the app computes the result in the browser).
+// iMessage previews identify as facebookexternalhit/Twitterbot; no UA counts as a bot.
+const PREVIEW_BOTS = /bot|crawl|spider|slurp|facebookexternalhit|facebot|whatsapp|telegram|discord|slack|linkedin|pinterest|skype|embedly|iframely|vkshare|snapchat|line\/|preview|google-inspectiontool|googleother/i;
+const isPreviewBot = request => {
+  const ua = request.headers.get("user-agent") || "";
+  return !ua || PREVIEW_BOTS.test(ua);
+};
+
 const escapeAttr = s => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 // Swap the content="" of <meta property|name="key" content="…">, whatever the spacing.
@@ -19,6 +28,7 @@ function setMeta(html, attr, key, value) {
 export default async function middleware(request) {
   const url = new URL(request.url);
   if (!url.searchParams.has("d") && !url.searchParams.has("p")) return;
+  if (!isPreviewBot(request)) return;
 
   try {
     const share = readShareParams(url.searchParams);

@@ -20,7 +20,7 @@ export default defineConfig([
   },
   {
     // Server-side code: Vercel function and the post-build page generator
-    files: ['api/**/*.js', 'scripts/**/*.mjs'],
+    files: ['api/**/*.js', 'scripts/**/*.mjs', 'server/**/*.{js,mjs}'],
     languageOptions: { globals: globals.node },
   },
 ])
