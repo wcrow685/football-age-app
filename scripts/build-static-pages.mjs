@@ -9,7 +9,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { slugify, assignSlugs } from "../src/players.js";
+import { slugify, assignSlugs, nameLang, clubLang } from "../src/players.js";
 import { BALL_PATCHES, BALL_SEAMS } from "../src/ball.js";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -130,6 +130,9 @@ const crumbs = items => `<nav class="crumbs" aria-label="Breadcrumb">${items.map
 const crest = (src, cls = "crest") => src ? `<img class="${cls}" src="${esc(src)}" alt="" width="20" height="20" loading="lazy" />` : "";
 const cta = `<a class="cta" href="/">How many pros are older than you? <span aria-hidden="true">→</span></a>`;
 const age = p => `<span data-birth="${p.birth}">${p.age}</span>`;
+// Pages are lang="en"; Turkish names and clubs get lang="tr" so uppercase headings read KAHVECİ, not KAHVECI.
+const pName = p => nameLang(p) === "tr" ? `<span lang="tr">${esc(p.name)}</span>` : esc(p.name);
+const cName = (club, league) => clubLang(league) === "tr" ? `<span lang="tr">${esc(club)}</span>` : esc(club);
 
 // ── Player pages ───────────────────────────────────────────────────────
 function playerPage(p) {
@@ -142,8 +145,8 @@ function playerPage(p) {
   const description = `${p.name} is ${p.age} years old, born ${longDate(p.birth)}. ${p.position} for ${p.club} (${p.league}). ${fmt(older)} of ${fmt(TOTAL)} active pros are older.`;
   const body = `
 ${crumbs([["Home", "/"], [p.league, `/league/${p.leagueSlug}`], [p.club, `/club/${p.clubSlug}`], [p.name]])}
-<p class="kicker">${esc(p.position)} · ${esc(p.club)}</p>
-<h1>How old is ${esc(p.name)}?</h1>
+<p class="kicker">${esc(p.position)} · ${cName(p.club, p.league)}</p>
+<h1>How old is ${pName(p)}?</h1>
 <p class="answer"><strong>${esc(p.name)} is ${age(p)} years old</strong>, born on ${longDate(p.birth)}.</p>
 <dl class="facts">
   <div><dt>Age</dt><dd>${age(p)}</dd></div>
@@ -154,7 +157,7 @@ ${crumbs([["Home", "/"], [p.league, `/league/${p.leagueSlug}`], [p.club, `/club/
   <div><dt>Position</dt><dd>${esc(p.position)}</dd></div>
 </dl>
 <section class="scoreboard" aria-label="Where ${esc(p.name)} ranks by age">
-  <div class="score"><div class="score-side"><span class="score-num accent">${fmt(older)}</span><span class="score-label">Older than ${esc(p.name)}</span></div><span class="score-colon" aria-hidden="true">:</span><div class="score-side"><span class="score-num">${fmt(younger)}</span><span class="score-label">Younger</span></div></div>
+  <div class="score"><div class="score-side"><span class="score-num accent">${fmt(older)}</span><span class="score-label">Older than ${pName(p)}</span></div><span class="score-colon" aria-hidden="true">:</span><div class="score-side"><span class="score-num">${fmt(younger)}</span><span class="score-label">Younger</span></div></div>
   <p class="score-caption">Out of ${fmt(TOTAL)} active players in the 10 top leagues, ${SEASON} season.${same ? ` ${same} other player${same === 1 ? " shares" : "s share"} the exact birth date.` : ""}</p>
 </section>
 ${cta}
@@ -163,7 +166,7 @@ ${cta}
   <ul class="rows">${near.map(n => `<li><a href="/player/${n.slug}">${esc(n.name)}</a><span>${crest(n.crest)}${esc(n.club)}</span><span class="muted">${shortDate(n.birth)}</span></li>`).join("")}</ul>
 </section>
 <section class="panel">
-  <h2>${esc(p.club)} squad</h2>
+  <h2>${cName(p.club, p.league)} squad</h2>
   <p>${club.players.length} players, average age ${oneDecimal(avg(club.players.map(x => x.age)))}. <a href="/club/${p.clubSlug}">See every ${esc(p.club)} player by age →</a></p>
 </section>
 ${p.tmUrl ? `<p class="muted small">More on <a href="${esc(p.tmUrl)}" rel="noopener" target="_blank">Transfermarkt</a>.</p>` : ""}`;
@@ -190,7 +193,7 @@ function clubPage(c) {
   const body = `
 ${crumbs([["Home", "/"], [c.league, `/league/${c.leagueSlug}`], [c.name]])}
 <p class="kicker">${esc(c.league)} · ${SEASON}</p>
-<h1>${crest(c.crest, "crest crest-lg")}${esc(c.name)} squad ages</h1>
+<h1>${crest(c.crest, "crest crest-lg")}${cName(c.name, c.league)} squad ages</h1>
 <dl class="facts">
   <div><dt>Players</dt><dd>${squad.length}</dd></div>
   <div><dt>Average age</dt><dd>${mean}</dd></div>

@@ -38,7 +38,7 @@ main.wrap { display: flex; flex-direction: column; gap: 24px; padding-block: 28p
 .crumbs { display: flex; flex-wrap: wrap; gap: 8px; font-size: 14px; color: var(--muted); }
 .crumbs a { color: var(--muted); }
 .kicker { font-family: var(--label); font-weight: 700; font-size: 15px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
-h1 { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-family: var(--display); font-weight: 400; font-size: clamp(40px, 6vw, 72px); line-height: 1; text-transform: uppercase; color: var(--chalk); }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(40px, 6vw, 72px); line-height: 1; text-transform: uppercase; color: var(--chalk); }
 h2 { font-family: var(--display); font-weight: 400; font-size: clamp(22px, 2.6vw, 28px); line-height: 1.1; text-transform: uppercase; color: var(--chalk); }
 .answer { font-size: 22px; color: var(--text); }
 .answer strong { color: var(--chalk); }
@@ -49,7 +49,8 @@ h2 { font-family: var(--display); font-weight: 400; font-size: clamp(22px, 2.6vw
 .facts dd { color: var(--chalk); font-weight: 600; }
 .facts dd a { text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
 .crest { width: 20px; height: 20px; object-fit: contain; vertical-align: middle; margin-right: 6px; }
-.crest-lg { width: 48px; height: 48px; margin: 0; }
+/* Inline in the h1 so the heading wraps as text (a name <span> must not become its own line) */
+.crest-lg { width: 48px; height: 48px; margin: 0 14px 0 0; vertical-align: -0.12em; }
 
 .scoreboard { display: flex; flex-direction: column; gap: 14px; padding: 24px; border: 2px solid var(--line-soft); border-radius: 8px; background: var(--board); }
 .score { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; }
