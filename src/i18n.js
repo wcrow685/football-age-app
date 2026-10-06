@@ -3,246 +3,204 @@
 // never says "your age" when it is showing Messi's.
 export const translations = {
   en: {
-    // Header
-    title: "How Many Football Players\nAre Older Than Me?",
-    subtitle: "Find out how you compare in age to today's top active football players across the world's biggest leagues.",
+    locale: "en-US",
+    decimalSep: ".",
+    percent: (v) => `${v}%`,
+    months: ["January","February","March","April","May","June","July","August","September","October","November","December"],
 
-    // Input
-    enterBirthDate: "Enter Your Birth Date",
+    // Header
+    brand: "Older Than Me?",
+    langLabel: "Language",
+
+    // Home
+    kicker: (total) => `2026–27 season · 10 leagues · ${total} players`,
+    heroTitle: "How many pro footballers are older than you?",
+    subtitle: "Enter your birthday. We line you up against every active player in the world's biggest leagues and give you the final score.",
+    ticketTitle: "Your kick-off date",
+    ticketStub: "Admit one",
     day: "Day",
     month: "Month",
     year: "Year",
-    compareBtn: "Compare Me →",
+    compareBtn: "Kick off",
+    ticketNote: "Free, instant, nothing is stored.",
     serverWaking: "Server is waking up, please wait a moment...",
-    hint: (total) => `Based on ${total} active players from Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Eredivisie, Liga Portugal, Süper Lig, Saudi Pro League & MLS (2026-27 season).`,
-    orCompareFamous: "Or compare with a famous player",
+    errorTimeout: "Server is taking too long to respond. Please try again in a moment.",
+    leaguesLabel: "Leagues covered",
+    starsTitle: "Or line up a star",
+    starsDesc: "See how many active players are older than the names you know.",
+    bornOn: (date) => `Born ${date}`,
+    faq: (oldest) => [
+      { q: "Who counts as a player?", a: "Everyone registered in a first-team squad for the 2026–27 season across ten top-flight leagues, refreshed after each transfer window." },
+      { q: "Who is the oldest active player?", a: oldest ? `${oldest[0]}, followed by ${oldest[1]} and ${oldest[2]}.` : "Pick a date to see the oldest players in the list." },
+      { q: "Do you keep my birthday?", a: "No. The comparison runs in your browser; the date only appears in the link if you share it." },
+    ],
+    footer: "Squad data 2026–27 · For entertainment only",
 
-    // Months
-    months: ["January","February","March","April","May","June","July","August","September","October","November","December"],
-
-    // Numbers
-    decimalSep: ".",
-    percent: (v) => `${v}%`,
-
-    // Big result
-    outOf: (total) => `out of ${total} players in our database`,
-
-    // Stat cards
-    yearsOld: "years old",
-    ofPlayers: (pct) => `${pct}% of players`,
-    ofAllPlayers: "of all players",
-
-    // Player list
-    sortedOldest: "Sorted from youngest to oldest",
-    all: "All",
-    showAll: (n) => `Show all ${n} players ↓`,
-
-    // Table headers
-    colPlayer: "Player",
-    colClub: "Club",
-    colLeague: "League",
-    colNationality: "Nationality",
-    colAge: "Age",
-    colBorn: "Born",
-
-    // Birthday section
-    sameBirthdayDesc: "Players born on the same day & month — any year",
-
-    // Charts
-    topNationalities: "Top Nationalities — Older Players",
-    ageDistTitle: "Age Distribution of All Players",
-    playersLabel: "Players",
-    ageLabel: (n) => `Age ${n}`,
-
-    // League table
-    leagueBreakdown: "Full League Breakdown",
-    leagueCol: "League",
-    shareCol: "Share",
-
-    // Reset
-    tryAnother: "Try Another Date",
-
-    // Share
-    shareResult: "Share your result",
-    shareOnX: "Share on X",
+    // Results
+    changeDate: "Change date",
+    scoreMeta: "10 leagues · 2026–27",
+    daysLabel: (n) => (n === 1 ? "day" : "days"),
+    shareResult: "Share the score",
+    copyLink: "Copy link",
+    copied: "Copied!",
+    shareOnX: "Post on X",
     facebook: "Facebook",
     whatsapp: "WhatsApp",
     shareText: (older, total, famous) =>
       famous
         ? `${older} out of ${total} active professional footballers are older than ${famous.name}! ⚽ How do you compare?`
         : `${older} out of ${total} active professional footballers are older than me! ⚽ How do you compare?`,
-
-    // Footer
-    footer: "Data from ESPN · 2026-27 season · For entertainment purposes only.",
-    errorTimeout: "Server is taking too long to respond. Please try again in a moment.",
+    sortedOldest: "Closest to you first",
+    all: "All",
+    showAll: (n) => `Show all ${n} players`,
+    colPlayer: "Player",
+    colClub: "Club",
+    colLeague: "League",
+    colAge: "Age",
+    colBorn: "Born",
+    leagueTable: "League table",
+    topNationalities: "Older players by country",
+    ageDistTitle: "Where you stand",
+    tryAnother: "Try another date",
 
     me: {
-      bigBefore: "active football players are older than you",
-      bigName: "",
-      bigAfter: "",
-      age: "Your Age",
-      olderLabel: "Older Than You",
-      youngerLabel: "Younger Than You",
-      olderThanPctLabel: "You're Older Than",
-      olderTitle: (n) => `Players Older Than You (${n})`,
+      context: (date, age) => `Born ${date} · Age ${age}`,
+      scoreHeader: (total) => `Full time · You vs ${total} pros`,
+      olderLabel: "Older than you",
+      youngerLabel: "Younger than you",
+      olderShare: (p) => `${p} of players are older`,
+      olderThanShare: (p) => `You're older than ${p}`,
+      olderTitle: (n) => `The older squad (${n})`,
       noPlayersLeague: "No players older than you in this league.",
-      sameBirthdayTitle: "Same Birthday as You 🎂",
+      sameBirthdayTitle: "Your birthday twins",
       noBirthday: "No players share your birthday.",
-      olderByLeague: "Older Players by League",
-      olderByLeagueDesc: "Number of players older than you in each league",
-      topNationalitiesDesc: "Which countries have the most players older than you",
-      ageDistDesc: (total, age) => `Where you stand among all ${total} players — the green line marks your age (${age})`,
+      ageDistDesc: (total, age) => `All ${total} players by age · you are ${age}`,
       marker: "You",
-      olderCol: "Older than you",
+      olderCol: "Players older than you",
       twinTitle: "Your closest age twin",
-      twinSub: (days) => days === 0 ? "Born on the very same day as you! 🤝"
+      twinSub: (days) => days === 0 ? "Born on the very same day as you!"
         : `Born ${Math.abs(days)} day${Math.abs(days) === 1 ? "" : "s"} ${days > 0 ? "after" : "before"} you`,
     },
 
     them: ({ name }) => ({
-      bigBefore: "active football players are older than ",
-      bigName: name,
-      bigAfter: "",
-      age: `${name}'s Age`,
-      olderLabel: `Older Than ${name}`,
-      youngerLabel: `Younger Than ${name}`,
-      olderThanPctLabel: `${name} Is Older Than`,
-      olderTitle: (n) => `Players Older Than ${name} (${n})`,
+      context: (date, age) => `${name} · born ${date} · age ${age}`,
+      scoreHeader: (total) => `Full time · ${name} vs ${total} pros`,
+      olderLabel: `Older than ${name}`,
+      youngerLabel: `Younger than ${name}`,
+      olderShare: (p) => `${p} of players are older`,
+      olderThanShare: (p) => `${name} is older than ${p}`,
+      olderTitle: (n) => `Older than ${name} (${n})`,
       noPlayersLeague: `No players older than ${name} in this league.`,
-      sameBirthdayTitle: `Same Birthday as ${name} 🎂`,
+      sameBirthdayTitle: `Born on ${name}'s birthday`,
       noBirthday: `No other players share ${name}'s birthday.`,
-      olderByLeague: "Older Players by League",
-      olderByLeagueDesc: `Number of players older than ${name} in each league`,
-      topNationalitiesDesc: `Which countries have the most players older than ${name}`,
-      ageDistDesc: (total, age) => `Where ${name} stands among all ${total} players — the green line marks ${name}'s age (${age})`,
+      ageDistDesc: (total, age) => `All ${total} players by age · ${name} is ${age}`,
       marker: name,
-      olderCol: `Older than ${name}`,
+      olderCol: `Players older than ${name}`,
       twinTitle: `${name}'s closest age twin`,
-      twinSub: (days) => days === 0 ? `Born on the very same day as ${name}! 🤝`
+      twinSub: (days) => days === 0 ? `Born on the very same day as ${name}!`
         : `Born ${Math.abs(days)} day${Math.abs(days) === 1 ? "" : "s"} ${days > 0 ? "after" : "before"} ${name}`,
     }),
   },
 
   tr: {
-    // Header
-    title: "Kaç Futbolcu\nBenden Daha Yaşlı?",
-    subtitle: "Dünyanın en büyük liglerindeki aktif profesyonel futbolcularla yaşını karşılaştır.",
+    locale: "tr-TR",
+    decimalSep: ",",
+    percent: (v) => `%${v}`,
+    months: ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"],
 
-    // Input
-    enterBirthDate: "Doğum Tarihini Gir",
+    // Header
+    brand: "Benden Yaşlı mı?",
+    langLabel: "Dil",
+
+    // Home
+    kicker: (total) => `2026–27 · 10 lig · ${total} futbolcu`,
+    heroTitle: "Kaç futbolcu senden yaşlı?",
+    subtitle: "Doğum tarihini gir, seni dünyanın en büyük liglerindeki tüm aktif futbolcularla karşılaştıralım ve maçın skorunu verelim.",
+    ticketTitle: "Başlama düdüğü",
+    ticketStub: "Tek kişilik",
     day: "Gün",
     month: "Ay",
     year: "Yıl",
-    compareBtn: "Karşılaştır →",
+    compareBtn: "Maçı başlat",
+    ticketNote: "Ücretsiz, anında, hiçbir şey kaydedilmez.",
     serverWaking: "Sunucu uyanıyor, lütfen bekle...",
-    hint: (total) => `Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Eredivisie, Liga Portugal, Süper Lig, Suudi Pro Ligi ve MLS'den ${total} aktif futbolcuya göre (2026-27 sezonu).`,
-    orCompareFamous: "Ya da ünlü bir futbolcuyla karşılaştır",
+    errorTimeout: "Sunucu yanıt vermekte gecikiyor. Lütfen birazdan tekrar dene.",
+    leaguesLabel: "Kapsanan ligler",
+    starsTitle: "Ya da bir yıldız seç",
+    starsDesc: "Tanıdığın isimlerden kaç futbolcunun daha yaşlı olduğunu gör.",
+    bornOn: (date) => `${date} doğumlu`,
+    faq: (oldest) => [
+      { q: "Hangi futbolcular sayılıyor?", a: "On üst düzey ligde 2026–27 sezonu A takım kadrosuna kayıtlı herkes. Liste her transfer döneminden sonra yenilenir." },
+      { q: "En yaşlı aktif futbolcu kim?", a: oldest ? `${oldest[0]}; onu ${oldest[1]} ve ${oldest[2]} izliyor.` : "Listeyi görmek için bir tarih seç." },
+      { q: "Doğum tarihimi saklıyor musunuz?", a: "Hayır. Karşılaştırma tarayıcında yapılır; tarih sadece paylaştığın linkte görünür." },
+    ],
+    footer: "Kadro verisi 2026–27 · Yalnızca eğlence amaçlıdır",
 
-    // Months
-    months: ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"],
-
-    // Numbers
-    decimalSep: ",",
-    percent: (v) => `%${v}`,
-
-    // Big result
-    outOf: (total) => `veritabanımızdaki ${total} futbolcu içinden`,
-
-    // Stat cards
-    yearsOld: "yaşında",
-    ofPlayers: (pct) => `tüm futbolcular içinde %${pct}`,
-    ofAllPlayers: "futbolcuların oranı",
-
-    // Player list
-    sortedOldest: "En gençten en yaşlıya",
-    all: "Tümü",
-    showAll: (n) => `Tüm ${n} futbolcuyu göster ↓`,
-
-    // Table headers
-    colPlayer: "Futbolcu",
-    colClub: "Kulüp",
-    colLeague: "Lig",
-    colNationality: "Uyruk",
-    colAge: "Yaş",
-    colBorn: "Doğum",
-
-    // Birthday section
-    sameBirthdayDesc: "Aynı gün ve ayda doğan futbolcular — yıl fark etmez",
-
-    // Charts
-    topNationalities: "Ülkelere Göre Yaşlı Futbolcular",
-    ageDistTitle: "Tüm Futbolcuların Yaş Dağılımı",
-    playersLabel: "Futbolcu",
-    ageLabel: (n) => `${n} Yaş`,
-
-    // League table
-    leagueBreakdown: "Liglere Göre Tam Döküm",
-    leagueCol: "Lig",
-    shareCol: "Oran",
-
-    // Reset
-    tryAnother: "Başka Tarih Dene",
-
-    // Share
-    shareResult: "Sonucunu paylaş",
-    shareOnX: "X'te Paylaş",
+    // Results
+    changeDate: "Tarihi değiştir",
+    scoreMeta: "10 lig · 2026–27",
+    daysLabel: () => "gün",
+    shareResult: "Skoru paylaş",
+    copyLink: "Linki kopyala",
+    copied: "Kopyalandı!",
+    shareOnX: "X'te paylaş",
     facebook: "Facebook",
     whatsapp: "WhatsApp",
     shareText: (older, total, famous) =>
       famous
         ? `${total} aktif profesyonel futbolcudan ${older} tanesi ${famous.trFrom || `${famous.name} ile karşılaştırıldığında`} daha yaşlı! ⚽ Ya sen?`
         : `${total} aktif profesyonel futbolcudan ${older} tanesi benden daha yaşlı! ⚽ Ya sen?`,
-
-    // Footer
-    footer: "Veriler ESPN'den · 2026-27 sezonu · Yalnızca eğlence amaçlıdır.",
-    errorTimeout: "Sunucu yanıt vermekte gecikiyor. Lütfen birazdan tekrar dene.",
+    sortedOldest: "Yaşça en yakından başlayarak",
+    all: "Tümü",
+    showAll: (n) => `${n} futbolcunun tümünü göster`,
+    colPlayer: "Futbolcu",
+    colClub: "Kulüp",
+    colLeague: "Lig",
+    colAge: "Yaş",
+    colBorn: "Doğum",
+    leagueTable: "Puan durumu",
+    topNationalities: "Ülkelere göre yaşlı futbolcular",
+    ageDistTitle: "Sen neredesin?",
+    tryAnother: "Başka tarih dene",
 
     me: {
-      bigBefore: "aktif futbolcu senden daha yaşlı",
-      bigName: "",
-      bigAfter: "",
-      age: "Yaşın",
-      olderLabel: "Senden Yaşlı",
-      youngerLabel: "Senden Genç",
-      olderThanPctLabel: "Daha Büyük Olduğun",
-      olderTitle: (n) => `Senden Yaşlı Futbolcular (${n})`,
+      context: (date, age) => `${date} · ${age} yaş`,
+      scoreHeader: (total) => `Maç sonu · Sen vs ${total} futbolcu`,
+      olderLabel: "Senden yaşlı",
+      youngerLabel: "Senden genç",
+      olderShare: (p) => `Senden yaşlı olanlar: ${p}`,
+      olderThanShare: (p) => `Daha büyük olduğun futbolcular: ${p}`,
+      olderTitle: (n) => `Senden yaşlı kadro (${n})`,
       noPlayersLeague: "Bu ligde senden yaşlı futbolcu yok.",
-      sameBirthdayTitle: "Seninle Aynı Doğum Günü 🎂",
+      sameBirthdayTitle: "Seninle aynı gün doğanlar",
       noBirthday: "Seninle aynı gün doğan futbolcu yok.",
-      olderByLeague: "Liglere Göre Senden Yaşlı Futbolcular",
-      olderByLeagueDesc: "Her ligde senden kaç futbolcu daha yaşlı",
-      topNationalitiesDesc: "Senden yaşlı futbolcuların en çok olduğu ülkeler",
-      ageDistDesc: (total, age) => `Tüm ${total} futbolcu arasındaki yerin — yeşil çizgi senin yaşını (${age}) gösteriyor`,
+      ageDistDesc: (total, age) => `Tüm ${total} futbolcunun yaşları · sen ${age} yaşındasın`,
       marker: "Sen",
-      olderCol: "Senden Yaşlı",
+      olderCol: "Senden yaşlı futbolcular",
       twinTitle: "En yakın yaşıtın",
-      twinSub: (days) => days === 0 ? "Seninle aynı gün doğmuş! 🤝"
+      twinSub: (days) => days === 0 ? "Seninle aynı gün doğmuş!"
         : `Senden ${Math.abs(days)} gün ${days > 0 ? "sonra" : "önce"} doğmuş`,
     },
 
-    // Turkish suffixes depend on pronunciation, so the big label uses the
-    // player's hand-written ablative form (`trFrom`, e.g. "Messi'den") and the
-    // remaining labels refer to the player with the pronoun "o".
+    // Turkish suffixes depend on pronunciation, so labels that need one use
+    // the player's hand-written ablative (`trFrom`, e.g. "Messi'den") or the
+    // pronoun "o".
     them: ({ name, trFrom }) => ({
-      bigBefore: "aktif futbolcu ",
-      bigName: trFrom || name,
-      bigAfter: " daha yaşlı",
-      age: "Yaşı",
-      olderLabel: "Ondan Yaşlı",
-      youngerLabel: "Ondan Genç",
-      olderThanPctLabel: "Daha Büyük Olduğu",
-      olderTitle: (n) => `${trFrom || name} Yaşlı Futbolcular (${n})`,
+      context: (date, age) => `${name} · ${date} · ${age} yaş`,
+      scoreHeader: (total) => `Maç sonu · ${name} vs ${total} futbolcu`,
+      olderLabel: "Ondan yaşlı",
+      youngerLabel: "Ondan genç",
+      olderShare: (p) => `Ondan yaşlı olanlar: ${p}`,
+      olderThanShare: (p) => `Daha büyük olduğu futbolcular: ${p}`,
+      olderTitle: (n) => `${trFrom || name} yaşlı kadro (${n})`,
       noPlayersLeague: "Bu ligde ondan yaşlı futbolcu yok.",
-      sameBirthdayTitle: `${name} ile Aynı Doğum Günü 🎂`,
+      sameBirthdayTitle: `${name} ile aynı gün doğanlar`,
       noBirthday: "Onunla aynı gün doğan başka futbolcu yok.",
-      olderByLeague: "Liglere Göre Ondan Yaşlı Futbolcular",
-      olderByLeagueDesc: "Her ligde ondan kaç futbolcu daha yaşlı",
-      topNationalitiesDesc: "Ondan yaşlı futbolcuların en çok olduğu ülkeler",
-      ageDistDesc: (total, age) => `${name}, tüm ${total} futbolcu arasında nerede? Yeşil çizgi onun yaşını (${age}) gösteriyor`,
+      ageDistDesc: (total, age) => `Tüm ${total} futbolcunun yaşları · ${name} ${age} yaşında`,
       marker: name,
-      olderCol: "Ondan Yaşlı",
+      olderCol: "Ondan yaşlı futbolcular",
       twinTitle: "En yakın yaşıtı",
-      twinSub: (days) => days === 0 ? "Onunla aynı gün doğmuş! 🤝"
+      twinSub: (days) => days === 0 ? "Onunla aynı gün doğmuş!"
         : `Ondan ${Math.abs(days)} gün ${days > 0 ? "sonra" : "önce"} doğmuş`,
     }),
   },

@@ -6,7 +6,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 const USE_STATIC = import.meta.env.VITE_USE_STATIC !== "false";
 const SITE_URL   = "https://www.howmanyfootballplayersolderthanme.com";
 
-// Results pulls in recharts (~400 kB), so load it as its own chunk.
+// The results page is only needed after a comparison, so load it as its own chunk.
 const loadResults = () => import("./components/Results");
 const Results = lazy(loadResults);
 
@@ -33,6 +33,18 @@ const slugify   = s => normalize(s).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g
 function formatBirth(birth, months) {
   const [y, m, d] = birth.split("-");
   return `${parseInt(d)} ${months[parseInt(m) - 1].slice(0, 3)} ${y}`;
+}
+
+const famousKey = (name, birth) => `${normalize(name)}|${birth}`;
+
+function BallIcon({ size = 34 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 34 34" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <circle cx="17" cy="17" r="15" />
+      <path d="M17 10l6 4.4-2.3 7.1h-7.4L11 14.4z" />
+      <path d="M17 10V2.5M23 14.4l7-2.4M20.7 21.5l4.4 6.1M13.3 21.5l-4.4 6.1M11 14.4l-7-2.4" />
+    </svg>
+  );
 }
 
 function daysInMonth(month, year) {
@@ -108,23 +120,25 @@ function computeResult(players, total, birthDate, famous) {
 }
 
 const FAMOUS_PLAYERS = [
-  { name: "Lionel Messi",      birth: "1987-06-24", trFrom: "Lionel Messi'den", photo: "https://img.a.transfermarkt.technology/portrait/medium/28003-1694529629.jpg" },
-  { name: "Cristiano Ronaldo", birth: "1985-02-05", trFrom: "Cristiano Ronaldo'dan", photo: "https://img.a.transfermarkt.technology/portrait/medium/8198-1716198662.jpg" },
-  { name: "Kylian Mbappé",     birth: "1998-12-20", trFrom: "Kylian Mbappé'den", photo: "https://img.a.transfermarkt.technology/portrait/medium/342229-1720090574.jpg" },
-  { name: "Erling Haaland",    birth: "2000-07-21", trFrom: "Erling Haaland'dan", photo: "https://img.a.transfermarkt.technology/portrait/medium/418560-1715778481.jpg" },
-  { name: "Vinicius Junior",   birth: "2000-07-12", trFrom: "Vinicius Junior'dan", photo: "https://img.a.transfermarkt.technology/portrait/medium/371998-1710946169.jpg" },
-  { name: "Jude Bellingham",   birth: "2003-06-29", trFrom: "Jude Bellingham'dan", photo: "https://img.a.transfermarkt.technology/portrait/medium/581678-1715345696.jpg" },
-  { name: "Mohamed Salah",     birth: "1992-06-15", trFrom: "Mohamed Salah'tan", photo: "https://img.a.transfermarkt.technology/portrait/medium/148455-1715683864.jpg" },
-  { name: "Lamine Yamal",      birth: "2007-07-13", trFrom: "Lamine Yamal'dan", photo: "https://img.a.transfermarkt.technology/portrait/medium/987714-1722413524.jpg" },
-  { name: "Harry Kane",        birth: "1993-07-28", trFrom: "Harry Kane'den", photo: "https://img.a.transfermarkt.technology/portrait/medium/132098-1715945570.jpg" },
-  { name: "Neymar Jr",         birth: "1992-02-05", trFrom: "Neymar Jr'dan", photo: "https://img.a.transfermarkt.technology/portrait/medium/68290-1715683897.jpg" },
-  { name: "Pedri",             birth: "2002-11-25", trFrom: "Pedri'den", photo: "https://img.a.transfermarkt.technology/portrait/medium/553919-1716198882.jpg" },
-  { name: "Rodri",             birth: "1996-06-22", trFrom: "Rodri'den", photo: "https://img.a.transfermarkt.technology/portrait/medium/357905-1715683975.jpg" },
+  { name: "Lionel Messi",      birth: "1987-06-24", trFrom: "Lionel Messi'den" },
+  { name: "Cristiano Ronaldo", birth: "1985-02-05", trFrom: "Cristiano Ronaldo'dan" },
+  { name: "Kylian Mbappé",     birth: "1998-12-20", trFrom: "Kylian Mbappé'den" },
+  { name: "Erling Haaland",    birth: "2000-07-21", trFrom: "Erling Haaland'dan" },
+  { name: "Vinicius Junior",   birth: "2000-07-12", trFrom: "Vinicius Junior'dan" },
+  { name: "Jude Bellingham",   birth: "2003-06-29", trFrom: "Jude Bellingham'dan" },
+  { name: "Mohamed Salah",     birth: "1992-06-15", trFrom: "Mohamed Salah'tan" },
+  { name: "Lamine Yamal",      birth: "2007-07-13", trFrom: "Lamine Yamal'dan" },
+  { name: "Harry Kane",        birth: "1993-07-28", trFrom: "Harry Kane'den" },
+  { name: "Neymar Jr",         birth: "1992-02-05", trFrom: "Neymar Jr'dan" },
+  { name: "Pedri",             birth: "2002-11-25", trFrom: "Pedri'den" },
+  { name: "Rodri",             birth: "1996-06-22", trFrom: "Rodri'den" },
   { name: "Arda Güler",        birth: "2005-02-25", trFrom: "Arda Güler'den", turkish: true },
   { name: "Kenan Yıldız",      birth: "2005-05-04", trFrom: "Kenan Yıldız'dan", turkish: true },
   { name: "Ferdi Kadıoğlu",    birth: "1999-10-07", trFrom: "Ferdi Kadıoğlu'ndan", turkish: true },
   { name: "Barış Alper Yılmaz", birth: "2000-05-23", trFrom: "Barış Alper Yılmaz'dan", turkish: true },
 ];
+
+const LEAGUES = ["Premier League", "La Liga", "Bundesliga", "Serie A", "Ligue 1", "Eredivisie", "Liga Portugal", "Süper Lig", "Saudi Pro League", "MLS"];
 
 function isValidBirth(d) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
@@ -155,7 +169,9 @@ export default function App() {
   const [loading, setLoading] = useState(!!initialTarget);
   const [loadingSlow, setLoadingSlow] = useState(false);
   const [error, setError]   = useState(null);
-  const [totalPlayers, setTotalPlayers] = useState("...");
+  const [totalPlayers, setTotalPlayers] = useState(null);
+  const [famousClubs, setFamousClubs] = useState({});
+  const [oldest, setOldest] = useState(null);
   const [lang, setLang]     = useState(() => localStorage.getItem("lang") || "en");
 
   const t = translations[lang];
@@ -174,17 +190,29 @@ export default function App() {
 
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
 
-  function toggleLang() {
-    const next = lang === "en" ? "tr" : "en";
+  function changeLang(next) {
     setLang(next);
     localStorage.setItem("lang", next);
   }
 
-  // Fetch total count for the hint text, and warm up the results chunk
+  // Load the squad data up front (for the count, the stars' current clubs and
+  // the FAQ's oldest players) and warm up the results chunk.
   useEffect(() => {
-    (USE_STATIC ? loadPlayers() : fetch(`${API_URL}/api/status`).then(r => r.json()))
-      .then(d => { if (d.total) setTotalPlayers(d.total); })
-      .catch(() => {});
+    if (USE_STATIC) {
+      loadPlayers()
+        .then(({ players, total }) => {
+          setTotalPlayers(total);
+          const clubs = {};
+          players.forEach(p => { clubs[famousKey(p.name, p.birth)] = p.club; });
+          setFamousClubs(clubs);
+          setOldest([...players].sort((a, b) => a.birth.localeCompare(b.birth)).slice(0, 3).map(p => `${p.name} (${p.club})`));
+        })
+        .catch(() => {});
+    } else {
+      fetch(`${API_URL}/api/status`).then(r => r.json())
+        .then(d => { if (d.total) setTotalPlayers(d.total); })
+        .catch(() => {});
+    }
     loadResults();
   }, []);
 
@@ -274,68 +302,113 @@ export default function App() {
     ? [...FAMOUS_PLAYERS.filter(p => p.turkish), ...FAMOUS_PLAYERS.filter(p => !p.turkish)]
     : FAMOUS_PLAYERS;
 
+  const fmt = n => n.toLocaleString(t.locale);
+
   return (
     <div className="app">
-      <header className="hero">
-        <div className="hero-content">
-          <button className="lang-toggle" onClick={toggleLang}>
-            {lang === "en" ? "🇹🇷 TR" : "🇬🇧 EN"}
-          </button>
-          <div className="ball-icon" style={{ cursor: result ? "pointer" : "default" }} onClick={result ? handleReset : undefined}>⚽</div>
-          <h1 style={{ cursor: result ? "pointer" : "default" }} onClick={result ? handleReset : undefined}>
-            {t.title.split("\n").map((line, i) => <span key={i}>{line}{i === 0 && <br />}</span>)}
-          </h1>
-          <p className="subtitle">{t.subtitle}</p>
+      <header className="topbar">
+        <div className="wrap topbar-inner">
+          <a href="/" className="brand" onClick={e => { e.preventDefault(); handleReset(); }}>
+            <BallIcon />
+            <span>{t.brand}</span>
+          </a>
+          <div className="lang-switch" role="group" aria-label={t.langLabel}>
+            <button type="button" aria-pressed={lang === "en"} onClick={() => changeLang("en")}>EN</button>
+            <button type="button" aria-pressed={lang === "tr"} onClick={() => changeLang("tr")}>TR</button>
+          </div>
         </div>
       </header>
 
       {!result ? (
-        <main className="input-section">
-          <div className="card input-card">
-            <h2>{t.enterBirthDate}</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="date-dropdowns">
-                <select value={day} onChange={e => setDay(e.target.value)} required>
-                  <option value="" disabled>{t.day}</option>
-                  {days.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-                <select value={month} onChange={e => { setMonth(e.target.value); clampDay(e.target.value, year); }} required>
-                  <option value="" disabled>{t.month}</option>
-                  {t.months.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-                </select>
-                <select value={year} onChange={e => { setYear(e.target.value); clampDay(month, e.target.value); }} required>
-                  <option value="" disabled>{t.year}</option>
-                  {years.map(y => <option key={y} value={y}>{y}</option>)}
-                </select>
-              </div>
+        <main>
+          <section className="wrap hero">
+            <div className="hero-copy">
+              <p className="kicker"><span className="kicker-dot" />{t.kicker(totalPlayers ? fmt(totalPlayers) : "…")}</p>
+              <h1>{t.heroTitle}</h1>
+              <p className="hero-sub">{t.subtitle}</p>
+            </div>
 
-              {error && <p className="error-msg">{error}</p>}
+            <div className="pitch">
+              <span className="pitch-halfway" aria-hidden="true" />
+              <span className="pitch-circle" aria-hidden="true" />
+              <form className="ticket" onSubmit={handleSubmit}>
+                <div className="ticket-head">
+                  <span className="ticket-title">{t.ticketTitle}</span>
+                  <span className="ticket-stub">{t.ticketStub}</span>
+                </div>
+                <div className="ticket-fields">
+                  <label>
+                    {t.day}
+                    <select value={day} onChange={e => setDay(e.target.value)} required>
+                      <option value="" disabled>–</option>
+                      {days.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </label>
+                  <label>
+                    {t.month}
+                    <select value={month} onChange={e => { setMonth(e.target.value); clampDay(e.target.value, year); }} required>
+                      <option value="" disabled>–</option>
+                      {t.months.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                    </select>
+                  </label>
+                  <label>
+                    {t.year}
+                    <select value={year} onChange={e => { setYear(e.target.value); clampDay(month, e.target.value); }} required>
+                      <option value="" disabled>–</option>
+                      {years.map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                  </label>
+                </div>
 
-              <button type="submit" className="btn-primary" disabled={loading}>
-                {loading ? <span className="spinner" /> : t.compareBtn}
-              </button>
-              {loadingSlow && !USE_STATIC && (
-                <p className="hint" style={{color: "#94a3b8", marginTop: 8}}>
-                  {t.serverWaking}
-                </p>
-              )}
-            </form>
-            <p className="hint">{t.hint(totalPlayers)}</p>
-          </div>
-          <div className="famous-section">
-            <p className="famous-label">{t.orCompareFamous}</p>
-            <div className="famous-grid">
+                {error && <p className="error-msg" role="alert">{error}</p>}
+
+                <button type="submit" className="kickoff" disabled={loading}>
+                  {loading ? <span className="spinner" aria-label="Loading" /> : (
+                    <>
+                      {t.compareBtn}
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                    </>
+                  )}
+                </button>
+                <p className="ticket-note">{loadingSlow && !USE_STATIC ? t.serverWaking : t.ticketNote}</p>
+              </form>
+            </div>
+          </section>
+
+          <section className="league-strip" aria-label={t.leaguesLabel}>
+            <div className="wrap league-strip-inner">
+              {LEAGUES.map(l => <span key={l}>{l}</span>)}
+            </div>
+          </section>
+
+          <section className="wrap stars">
+            <div className="section-head">
+              <h2>{t.starsTitle}</h2>
+              <p>{t.starsDesc}</p>
+            </div>
+            <div className="star-grid">
               {famousPlayers.map(p => (
-                <button key={p.name} className="famous-card" onClick={() => handleFamousPlayer(p)} disabled={loading}>
-                  <span className="famous-name">{p.name}</span>
-                  <span className="famous-birth">🎂 {formatBirth(p.birth, t.months)}</span>
+                <button key={p.name} type="button" className="star-card" onClick={() => handleFamousPlayer(p)} disabled={loading}>
+                  <span className="star-year" aria-hidden="true">{p.birth.slice(2, 4)}</span>
+                  <span className="star-club">{famousClubs[famousKey(p.name, p.birth)] || "\u00a0"}</span>
+                  <span className="star-name">{p.name}</span>
+                  <span className="star-born">{t.bornOn(formatBirth(p.birth, t.months))}</span>
                 </button>
               ))}
             </div>
-          </div>
+          </section>
+
+          <section className="wrap faq">
+            {t.faq(oldest).map((item, i) => (
+              <details key={item.q} open={i === 0}>
+                <summary>{item.q}</summary>
+                <p>{item.a}</p>
+              </details>
+            ))}
+          </section>
         </main>
       ) : (
-        <Suspense fallback={<main className="results" style={{ textAlign: "center", padding: 48 }}><span className="spinner" /></main>}>
+        <Suspense fallback={<main className="wrap results-loading"><span className="spinner" aria-label="Loading" /></main>}>
           <Results
             result={result}
             onReset={handleReset}
@@ -345,8 +418,11 @@ export default function App() {
         </Suspense>
       )}
 
-      <footer>
-        <p>{t.footer}</p>
+      <footer className="site-footer">
+        <div className="wrap site-footer-inner">
+          <span>{t.footer}</span>
+          <span>howmanyfootballplayersolderthanme.com</span>
+        </div>
       </footer>
     </div>
   );

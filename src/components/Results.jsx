@@ -1,45 +1,12 @@
 import { useState } from "react";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Cell, ReferenceLine,
-} from "recharts";
-
-const LEAGUE_COLORS = {
-  "Premier League":   "#3b82f6",
-  "La Liga":          "#ef4444",
-  "Bundesliga":       "#f59e0b",
-  "Serie A":          "#10b981",
-  "Ligue 1":          "#8b5cf6",
-  "Süper Lig":        "#ec4899",
-  "Saudi Pro League": "#14b8a6",
-  "MLS":              "#f97316",
-  "Eredivisie":       "#eab308",
-  "Liga Portugal":    "#22c55e",
-};
-
-const NAT_COLORS = [
-  "#3b82f6","#ef4444","#f59e0b","#10b981","#8b5cf6",
-  "#ec4899","#14b8a6","#f97316","#6366f1","#84cc16","#06b6d4","#a855f7",
-];
-
-function StatCard({ label, value, sub, accent }) {
-  return (
-    <div className="stat-card" style={{ borderTopColor: accent }}>
-      <div className="stat-value" style={{ color: accent }}>{value}</div>
-      <div className="stat-label">{label}</div>
-      {sub && <div className="stat-sub">{sub}</div>}
-    </div>
-  );
-}
 
 // Whole percentages hide small shares (23/5757 → "0%"), so show one decimal near 0 and 100.
-function formatPct(part, total, decimalSep) {
+function formatPct(part, total, decimalSep, digits = 0) {
   const pct = (part / total) * 100;
   const text = pct > 0 && pct < 0.1 ? "<0.1"
              : pct > 99.9 && pct < 100 ? ">99.9"
-             : pct > 0 && pct < 1 ? pct.toFixed(1)
-             : pct > 99 && pct < 100 ? pct.toFixed(1)
-             : String(Math.round(pct));
+             : (pct > 0 && pct < 1) || (pct > 99 && pct < 100) ? pct.toFixed(1)
+             : pct.toFixed(digits).replace(/\.0$/, "");
   return text.replace(".", decimalSep);
 }
 
@@ -55,30 +22,94 @@ function playerAge(birth) {
   return age;
 }
 
-function ShareButtons({ older, total, famous, shareUrl, t }) {
-  const shareText = t.shareText(older, total, famous);
-  const fullText  = `${shareText} ${shareUrl}`;
+function longDate(iso, months) {
+  const [y, m, d] = iso.split("-");
+  return `${parseInt(d)} ${months[parseInt(m) - 1]} ${y}`;
+}
 
-  const twitterUrl  = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
-  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(fullText)}`;
-  const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+function shortDate(iso, months) {
+  const [y, m, d] = iso.split("-");
+  return `${parseInt(d)} ${months[parseInt(m) - 1].slice(0, 3)} ${y}`;
+}
+
+function PlayerName({ p }) {
+  return p.tmUrl
+    ? <a className="player-link" href={p.tmUrl} target="_blank" rel="noopener noreferrer">{p.name}</a>
+    : <span>{p.name}</span>;
+}
+
+function Scoreboard({ older, younger, total, subject, t, fmt, pct }) {
+  return (
+    <section className="scoreboard" aria-label={subject.scoreHeader(fmt(total))}>
+      <div className="scoreboard-top">
+        <span>{subject.scoreHeader(fmt(total))}</span>
+        <span className="accent">{t.scoreMeta}</span>
+      </div>
+      <div className="score">
+        <div className="score-side">
+          <span className="score-num accent">{fmt(older)}</span>
+          <span className="score-label">{subject.olderLabel}</span>
+        </div>
+        <span className="score-colon" aria-hidden="true">:</span>
+        <div className="score-side">
+          <span className="score-num">{fmt(younger)}</span>
+          <span className="score-label">{subject.youngerLabel}</span>
+        </div>
+      </div>
+      <div className="score-bar" aria-hidden="true">
+        <span style={{ width: `${(older / total) * 100}%` }} />
+      </div>
+      <div className="score-caption">
+        <span>{subject.olderShare(t.percent(pct(older, 1)))}</span>
+        <span>{subject.olderThanShare(t.percent(pct(younger, 1)))}</span>
+      </div>
+    </section>
+  );
+}
+
+function TwinCard({ twin, subject, t }) {
+  const sign = twin.days > 0 ? "+" : twin.days < 0 ? "−" : "";
+  return (
+    <div className="twin">
+      <div className="twin-days" aria-hidden="true">
+        <span className="twin-days-num">{sign}{Math.abs(twin.days)}</span>
+        <span className="twin-days-label">{t.daysLabel(Math.abs(twin.days))}</span>
+      </div>
+      <div className="twin-body">
+        <span className="eyebrow">{subject.twinTitle}</span>
+        {/* Data names are ASCII-folded ("Yilmaz"), so Turkish uppercasing would give "YİLMAZ" */}
+        <span className="twin-name" lang="en"><PlayerName p={twin} /></span>
+        <span className="twin-meta">{twin.club} · {twin.league} · {subject.twinSub(twin.days)}</span>
+      </div>
+    </div>
+  );
+}
+
+function SharePanel({ older, total, famous, shareUrl, t }) {
+  const [copied, setCopied] = useState(false);
+  const shareText = t.shareText(older, total, famous);
+  const xUrl  = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+  const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+
+  function copy() {
+    navigator.clipboard?.writeText(shareUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {});
+  }
 
   return (
-    <div className="share-buttons">
-      <span className="share-label">{t.shareResult}</span>
+    <div className="share">
+      <span className="eyebrow">{t.shareResult}</span>
       <div className="share-row">
-        <a className="share-btn share-x" href={twitterUrl} target="_blank" rel="noopener noreferrer">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          {t.shareOnX}
-        </a>
-        <a className="share-btn share-fb" href={facebookUrl} target="_blank" rel="noopener noreferrer">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-          {t.facebook}
-        </a>
-        <a className="share-btn share-wa" href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-          {t.whatsapp}
-        </a>
+        <button type="button" className="btn btn-accent" onClick={copy}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1" /><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1" /></svg>
+          <span aria-live="polite">{copied ? t.copied : t.copyLink}</span>
+        </button>
+        <a className="btn" href={waUrl} target="_blank" rel="noopener noreferrer">{t.whatsapp}</a>
+        <a className="btn" href={xUrl} target="_blank" rel="noopener noreferrer">{t.shareOnX}</a>
+        <a className="btn" href={fbUrl} target="_blank" rel="noopener noreferrer">{t.facebook}</a>
       </div>
     </div>
   );
@@ -87,263 +118,165 @@ function ShareButtons({ older, total, famous, shareUrl, t }) {
 // Language-independent sentinel so the "All" tab survives a language switch
 const ALL = "__all__";
 
-function TwinCard({ twin, subject }) {
-  return (
-    <div className="twin-card">
-      <div className="twin-label">{subject.twinTitle}</div>
-      <div className="twin-name">
-        {twin.tmUrl
-          ? <a className="player-stats-link" href={twin.tmUrl} target="_blank" rel="noopener noreferrer">{twin.name}</a>
-          : twin.name}
-      </div>
-      <div className="twin-meta">
-        {twin.crest && <img src={twin.crest} alt="" className="club-logo" />}
-        <span>{twin.club} · {twin.league}</span>
-      </div>
-      <div className="twin-sub">{subject.twinSub(twin.days)}</div>
-    </div>
-  );
-}
-
 export default function Results({ result, onReset, t, shareUrl }) {
-  const { older, olderPlayers, sameBirthday, total, byLeague, topNationalities, ageDistribution, userAge, younger, twin, famous } = result;
+  const { older, olderPlayers, sameBirthday, total, byLeague, topNationalities, ageDistribution, userAge, younger, twin, birthDate, famous } = result;
   const subject = famous ? t.them(famous) : t.me;
-  const pct = n => formatPct(n, total, t.decimalSep);
+  const fmt = n => n.toLocaleString(t.locale);
+  const pct = (n, digits) => formatPct(n, total, t.decimalSep, digits);
+
   const [leagueFilter, setLeagueFilter] = useState(ALL);
   const [showAll, setShowAll] = useState(false);
 
-  const leagues = [ALL, ...byLeague.map(l => l.name).filter(n => LEAGUE_COLORS[n])];
-  const filtered = leagueFilter === ALL
-    ? olderPlayers
-    : olderPlayers.filter(p => p.league === leagueFilter);
+  const filtered = leagueFilter === ALL ? olderPlayers : olderPlayers.filter(p => p.league === leagueFilter);
   const displayed = showAll ? filtered : filtered.slice(0, 20);
+  const maxLeague = byLeague[0]?.count || 1;
+  const maxNat = topNationalities[0]?.count || 1;
+  const maxAge = Math.max(...ageDistribution.map(a => a.count));
 
   return (
-    <main className="results">
-
-      {/* Big number */}
-      <div className="big-result">
-        <div className="big-number">{older}</div>
-        <div className="big-label">
-          {subject.bigBefore}{subject.bigName && <strong>{subject.bigName}</strong>}{subject.bigAfter}
-        </div>
-        <div className="big-sub">{t.outOf(total)}</div>
+    <main className="wrap results">
+      <div className="context-bar">
+        <span>{subject.context(longDate(birthDate, t.months), userAge)}</span>
+        <button type="button" className="btn btn-pill" onClick={onReset}>{t.changeDate}</button>
       </div>
 
-      {twin && <TwinCard twin={twin} subject={subject} />}
+      <Scoreboard older={older} younger={younger} total={total} subject={subject} t={t} fmt={fmt} pct={pct} />
 
-      <ShareButtons older={older} total={total} famous={famous} shareUrl={shareUrl} t={t} />
-
-      {/* Stat cards */}
-      <div className="stat-cards">
-        <StatCard label={subject.age}               value={`${userAge}`}          sub={t.yearsOld}                    accent="#3b82f6" />
-        <StatCard label={subject.olderLabel}        value={`${older}`}            sub={t.ofPlayers(pct(older))}       accent="#10b981" />
-        <StatCard label={subject.youngerLabel}      value={`${younger}`}          sub={t.ofPlayers(pct(younger))}     accent="#ef4444" />
-        <StatCard label={subject.olderThanPctLabel} value={t.percent(pct(younger))} sub={t.ofAllPlayers}                accent="#f59e0b" />
+      <div className="grid-2">
+        {twin && <TwinCard twin={twin} subject={subject} t={t} />}
+        <SharePanel older={older} total={total} famous={famous} shareUrl={shareUrl} t={t} />
       </div>
 
-      {/* Player list */}
-      <div className="chart-section">
-        <h2>{subject.olderTitle(older)}</h2>
-        <p className="chart-desc">{t.sortedOldest}</p>
+      <div className="grid-2 grid-top">
+        <section className="panel">
+          <div className="panel-head">
+            <h2>{subject.olderTitle(fmt(older))}</h2>
+            <span>{t.sortedOldest}</span>
+          </div>
 
-        <div className="filter-tabs">
-          {leagues.map(l => (
-            <button
-              key={l}
-              className={`filter-tab ${leagueFilter === l ? "active" : ""}`}
-              style={leagueFilter === l && l !== ALL ? { borderColor: LEAGUE_COLORS[l], color: LEAGUE_COLORS[l], background: `${LEAGUE_COLORS[l]}18` } : {}}
-              onClick={() => { setLeagueFilter(l); setShowAll(false); }}
-            >
-              {l === ALL ? `${t.all} (${older})` : `${l} (${byLeague.find(x => x.name === l)?.count ?? 0})`}
-            </button>
-          ))}
-        </div>
-
-        {filtered.length === 0 ? (
-          <p className="no-players">{subject.noPlayersLeague}</p>
-        ) : (
-          <>
-            <div className="player-list">
-              <div className="player-list-header">
-                <span>#</span>
-                <span>{t.colPlayer}</span>
-                <span>{t.colClub}</span>
-                <span>{t.colLeague}</span>
-                <span>{t.colNationality}</span>
-                <span>{t.colAge}</span>
-                <span>{t.colBorn}</span>
-              </div>
-              {displayed.map((p, i) => {
-                const color = LEAGUE_COLORS[p.league] || "#6366f1";
-                return (
-                  <div key={playerKey(p)} className="player-row">
-                    <span className="player-rank">{i + 1}</span>
-                    {p.tmUrl
-                      ? <a className="player-name player-stats-link" href={p.tmUrl} target="_blank" rel="noopener noreferrer">{p.name}</a>
-                      : <span className="player-name">{p.name}</span>
-                    }
-                    <span className="player-club">
-                      {p.crest && <img src={p.crest} alt="" className="club-logo" />}
-                      <span className="cell-text">{p.club}</span>
-                    </span>
-                    <span className="player-league" style={{ color }}>
-                      {p.leagueLogo && <img src={p.leagueLogo} alt="" className="league-logo" />}
-                      <span className="cell-text">{p.league}</span>
-                    </span>
-                    <span className="player-nat">{p.nationality}</span>
-                    <span className="player-age">{playerAge(p.birth)}</span>
-                    <span className="player-born">{p.birth}</span>
-                  </div>
-                );
-              })}
-            </div>
-            {filtered.length > 20 && !showAll && (
-              <button className="show-more" onClick={() => setShowAll(true)}>
-                {t.showAll(filtered.length)}
+          {byLeague.length > 1 && (
+            <div className="filter-tabs" role="group" aria-label={t.colLeague}>
+              <button type="button" aria-pressed={leagueFilter === ALL} onClick={() => { setLeagueFilter(ALL); setShowAll(false); }}>
+                {t.all} ({fmt(older)})
               </button>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Same birthday */}
-      <div className="chart-section">
-        <h2>{subject.sameBirthdayTitle}</h2>
-        <p className="chart-desc">{t.sameBirthdayDesc}</p>
-        {sameBirthday.length === 0 ? (
-          <p className="no-players">{subject.noBirthday}</p>
-        ) : (
-          <div className="player-list">
-            <div className="player-list-header">
-              <span>#</span>
-              <span>{t.colPlayer}</span>
-              <span>{t.colClub}</span>
-              <span>{t.colLeague}</span>
-              <span>{t.colNationality}</span>
-              <span>{t.colAge}</span>
-              <span>{t.colBorn}</span>
+              {byLeague.map(l => (
+                <button key={l.name} type="button" aria-pressed={leagueFilter === l.name} onClick={() => { setLeagueFilter(l.name); setShowAll(false); }}>
+                  {l.name} ({l.count})
+                </button>
+              ))}
             </div>
-            {sameBirthday.map((p, i) => {
-              const color = LEAGUE_COLORS[p.league] || "#6366f1";
-              return (
-                <div key={playerKey(p)} className="player-row birthday-row">
-                  <span className="player-rank">{i + 1}</span>
-                  {p.tmUrl
-                    ? <a className="player-name player-stats-link" href={p.tmUrl} target="_blank" rel="noopener noreferrer">{p.name}</a>
-                    : <span className="player-name">{p.name}</span>
-                  }
-                  <span className="player-club">
-                    {p.crest && <img src={p.crest} alt="" className="club-logo" />}
-                    {p.club}
-                  </span>
-                  <span className="player-league" style={{ color }}>
-                    {p.leagueLogo && <img src={p.leagueLogo} alt="" className="league-logo" />}
-                    {p.league}
-                  </span>
-                  <span className="player-nat">{p.nationality}</span>
-                  <span className="player-age">{playerAge(p.birth)}</span>
-                  <span className="player-born">{p.birth}</span>
+          )}
+
+          {filtered.length === 0 ? (
+            <p className="empty">{subject.noPlayersLeague}</p>
+          ) : (
+            <>
+              <div className="squad" role="table" aria-label={subject.olderTitle(fmt(older))}>
+                <div className="squad-row squad-head" role="row">
+                  <span role="columnheader">{t.colPlayer}</span>
+                  <span role="columnheader">{t.colClub}</span>
+                  <span role="columnheader" className="squad-age">{t.colAge}</span>
+                  <span role="columnheader" className="squad-born">{t.colBorn}</span>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* League chart */}
-      <div className="chart-section">
-        <h2>{subject.olderByLeague}</h2>
-        <p className="chart-desc">{subject.olderByLeagueDesc}</p>
-        <div className="chart-wrap">
-          <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={byLeague} margin={{ top: 10, right: 20, left: 0, bottom: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" />
-              <XAxis dataKey="name" tick={{ fill: "#a0aec0", fontSize: 12 }} angle={-30} textAnchor="end" interval={0} />
-              <YAxis tick={{ fill: "#a0aec0", fontSize: 12 }} />
-              <Tooltip contentStyle={{ background: "#1a1a2e", border: "1px solid #2a2a3a", borderRadius: 8 }} labelStyle={{ color: "#e2e8f0" }} itemStyle={{ color: "#e2e8f0" }} />
-              <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                {byLeague.map(e => <Cell key={e.name} fill={LEAGUE_COLORS[e.name] || "#6366f1"} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Nationality chart */}
-      <div className="chart-section">
-        <h2>{t.topNationalities}</h2>
-        <p className="chart-desc">{subject.topNationalitiesDesc}</p>
-        <div className="chart-wrap">
-          <ResponsiveContainer width="100%" height={360}>
-            <BarChart data={topNationalities} layout="vertical" margin={{ top: 10, right: 40, left: 110, bottom: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" horizontal={false} />
-              <XAxis type="number" tick={{ fill: "#a0aec0", fontSize: 12 }} />
-              <YAxis type="category" dataKey="name" tick={{ fill: "#e2e8f0", fontSize: 12 }} width={100} />
-              <Tooltip contentStyle={{ background: "#1a1a2e", border: "1px solid #2a2a3a", borderRadius: 8 }} labelStyle={{ color: "#e2e8f0" }} itemStyle={{ color: "#e2e8f0" }} />
-              <Bar dataKey="count" radius={[0, 6, 6, 0]}>
-                {topNationalities.map((e, i) => <Cell key={e.name} fill={NAT_COLORS[i % NAT_COLORS.length]} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Age distribution */}
-      <div className="chart-section">
-        <h2>{t.ageDistTitle}</h2>
-        <p className="chart-desc">{subject.ageDistDesc(total, userAge)}</p>
-        <div className="chart-wrap">
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={ageDistribution} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" />
-              <XAxis dataKey="age" tick={{ fill: "#a0aec0", fontSize: 11 }} />
-              <YAxis tick={{ fill: "#a0aec0", fontSize: 12 }} />
-              <Tooltip
-                contentStyle={{ background: "#1a1a2e", border: "1px solid #2a2a3a", borderRadius: 8 }}
-                labelStyle={{ color: "#e2e8f0" }} itemStyle={{ color: "#e2e8f0" }}
-                formatter={v => [v, t.playersLabel]} labelFormatter={l => t.ageLabel(l)}
-              />
-              <ReferenceLine x={userAge} stroke="#10b981" strokeWidth={2} strokeDasharray="6 3"
-                label={{ value: subject.marker, fill: "#10b981", fontSize: 13, position: "top" }} />
-              <Bar dataKey="count" fill="#3b82f6" radius={[3, 3, 0, 0]} opacity={0.85} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* League breakdown table */}
-      <div className="chart-section">
-        <h2>{t.leagueBreakdown}</h2>
-        <div className="league-table">
-          <div className="league-table-header">
-            <span>{t.leagueCol}</span>
-            <span>{subject.olderCol}</span>
-            <span>{t.shareCol}</span>
-          </div>
-          {byLeague.map(row => {
-            const color = LEAGUE_COLORS[row.name] || "#6366f1";
-            return (
-              <div key={row.name} className="league-table-row">
-                <span className="league-name" style={{ color }}>
-                  <span className="league-dot" style={{ background: color }} />
-                  {row.name}
-                </span>
-                <span className="league-count">{row.count}</span>
-                <span className="league-pct">
-                  <span className="pct-bar-bg">
-                    <span className="pct-bar-fill" style={{ width: `${Math.min(100, Math.round((row.count / total) * 100 * 5))}%`, background: color }} />
-                  </span>
-                  {t.percent(pct(row.count))}
-                </span>
+                {displayed.map(p => (
+                  <div key={playerKey(p)} className="squad-row" role="row">
+                    <span role="cell" className="squad-name"><PlayerName p={p} /></span>
+                    <span role="cell" className="squad-club">
+                      {p.crest && <img src={p.crest} alt="" className="crest" loading="lazy" />}
+                      <span className="ellipsis">{p.club}</span>
+                    </span>
+                    <span role="cell" className="squad-age">{playerAge(p.birth)}</span>
+                    <span role="cell" className="squad-born">{shortDate(p.birth, t.months)}</span>
+                  </div>
+                ))}
               </div>
-            );
-          })}
-        </div>
+              {filtered.length > 20 && !showAll && (
+                <button type="button" className="btn btn-block" onClick={() => setShowAll(true)}>
+                  {t.showAll(fmt(filtered.length))}
+                </button>
+              )}
+            </>
+          )}
+        </section>
+
+        <section className="panel">
+          <div className="panel-head">
+            <h2>{t.leagueTable}</h2>
+            <span>{subject.olderCol}</span>
+          </div>
+          <ol className="table-list">
+            {byLeague.map((l, i) => (
+              <li key={l.name}>
+                <span className="table-pos">{i + 1}</span>
+                <span className="table-name">{l.name}</span>
+                <span className="meter" aria-hidden="true"><span style={{ width: `${(l.count / maxLeague) * 100}%` }} /></span>
+                <span className="table-count">{l.count}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
       </div>
 
-      <div className="reset-wrap">
-        <button className="btn-secondary" onClick={onReset}>{t.tryAnother}</button>
+      <section className="panel">
+        <div className="panel-head">
+          <h2>{t.ageDistTitle}</h2>
+          <span>{subject.ageDistDesc(fmt(total), userAge)}</span>
+        </div>
+        <div className="age-scroll">
+          <div className="age-chart" role="img" aria-label={subject.ageDistDesc(fmt(total), userAge)} style={{ gridTemplateColumns: `repeat(${ageDistribution.length}, minmax(0, 1fr))` }}>
+            {ageDistribution.map(a => (
+              <div key={a.age} className="age-col" title={`${t.colAge} ${a.age}: ${a.count}`}>
+                <span className="age-marker">{a.age === userAge ? subject.marker : ""}</span>
+                <span className="age-track">
+                  <span
+                    className={`age-bar${a.age === userAge ? " is-you" : a.age > userAge ? " is-older" : ""}`}
+                    style={{ height: `${Math.max(1, (a.count / maxAge) * 100)}%` }}
+                  />
+                </span>
+                <span className="age-label">{a.age % 5 === 0 || a.age === userAge ? a.age : ""}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="grid-2 grid-top">
+        <section className="panel panel-outline">
+          <div className="panel-head">
+            <h2>{subject.sameBirthdayTitle}</h2>
+          </div>
+          {sameBirthday.length === 0 ? (
+            <p className="empty">{subject.noBirthday}</p>
+          ) : (
+            <div className="chips">
+              {sameBirthday.map(p => (
+                <span key={playerKey(p)} className="chip">
+                  <PlayerName p={p} />
+                  <span>{p.club} · {p.birth.slice(0, 4)}</span>
+                </span>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="panel panel-outline">
+          <div className="panel-head">
+            <h2>{t.topNationalities}</h2>
+          </div>
+          <div className="nat-list">
+            {topNationalities.slice(0, 8).map(n => (
+              <div key={n.name} className="nat-row">
+                <span className="ellipsis">{n.name}</span>
+                <span className="meter meter-chalk" aria-hidden="true"><span style={{ width: `${(n.count / maxNat) * 100}%` }} /></span>
+                <span className="nat-count">{n.count}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <div className="results-end">
+        <button type="button" className="btn btn-pill" onClick={onReset}>{t.tryAnother}</button>
       </div>
     </main>
   );
