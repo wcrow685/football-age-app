@@ -6,8 +6,8 @@ import { score } from "../src/players.js";
 import { readShareParams, shareCopy, formatNumber } from "../src/shareCopy.js";
 import { BALL_PATCHES, BALL_SEAMS } from "../src/ball.js";
 
-export const config = { runtime: "edge" };
-
+// Node.js runtime: the edge runtime refuses to compile @vercel/og's wasm
+// ("Wasm code generation disallowed by embedder").
 const C = {
   pitch: "#0B2219", lineSoft: "#22483A", line: "#2C5A47", board: "#04110C",
   chalk: "#F2F5EE", text: "#C9D8CF", muted: "#A9BDB2", accent: "#FFC83D",
@@ -26,7 +26,7 @@ async function font(origin, file) {
   return res.arrayBuffer();
 }
 
-export default async function handler(request) {
+export async function GET(request) {
   const url = new URL(request.url);
   const share = readShareParams(url.searchParams);
   if (!share) return Response.redirect(new URL("/og-image.png", url), 302);
