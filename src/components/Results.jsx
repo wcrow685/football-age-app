@@ -34,8 +34,8 @@ function shortDate(iso, months) {
 }
 
 function PlayerName({ p }) {
-  return p.tmUrl
-    ? <a className="player-link" href={p.tmUrl} target="_blank" rel="noopener noreferrer">{p.name}</a>
+  return p.slug
+    ? <a className="player-link" href={`/player/${p.slug}`}>{p.name}</a>
     : <span>{p.name}</span>;
 }
 

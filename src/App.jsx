@@ -1,7 +1,7 @@
 import { useState, useEffect, useEffectEvent, useId, lazy, Suspense } from "react";
 import { translations } from "./i18n";
 import { BALL_PATCHES, BALL_SEAMS } from "./ball";
-import { normalize, slugify, daysInMonth, isValidBirth, FAMOUS_PLAYERS, findFamous, isSamePlayer, closestTwin } from "./players";
+import { normalize, slugify, daysInMonth, isValidBirth, FAMOUS_PLAYERS, findFamous, isSamePlayer, closestTwin, assignSlugs } from "./players";
 import "./App.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
@@ -22,6 +22,7 @@ function loadPlayers() {
         if (!r.ok) throw new Error(`Server error: ${r.status}`);
         return r.json();
       })
+      .then(d => { assignSlugs(d.players); return d; })
       .catch(err => { playersPromise = undefined; throw err; });
   }
   return playersPromise;
@@ -124,7 +125,9 @@ function readUrl() {
   return d && isValidBirth(d) ? { birthDate: d } : null;
 }
 
-const resultPath = (birthDate, famous) => famous ? `/?p=${slugify(famous.name)}` : `/?d=${birthDate}`;
+const isTurkishPath = () => window.location.pathname === "/tr" || window.location.pathname.startsWith("/tr/");
+const basePath = () => (isTurkishPath() ? "/tr" : "/");
+const resultQuery = (birthDate, famous) => famous ? `?p=${slugify(famous.name)}` : `?d=${birthDate}`;
 
 export default function App() {
   const currentYear = new Date().getFullYear();
@@ -141,9 +144,11 @@ export default function App() {
   const [totalPlayers, setTotalPlayers] = useState(null);
   const [famousClubs, setFamousClubs] = useState({});
   const [oldest, setOldest] = useState(null);
-  // A shared link from a Turkish visitor carries &l=tr; a saved choice still wins.
+  // /tr is the Turkish page; a shared link from a Turkish visitor carries &l=tr
+  // (a saved choice wins there, but not over the /tr address itself).
   const [lang, setLang]     = useState(() =>
-    localStorage.getItem("lang") || (new URLSearchParams(window.location.search).get("l") === "tr" ? "tr" : "en"));
+    isTurkishPath() ? "tr"
+      : localStorage.getItem("lang") || (new URLSearchParams(window.location.search).get("l") === "tr" ? "tr" : "en"));
 
   const t = translations[lang];
 
@@ -164,6 +169,8 @@ export default function App() {
   function changeLang(next) {
     setLang(next);
     localStorage.setItem("lang", next);
+    // Keep the address in step so /tr stays the Turkish page and / the English one.
+    window.history.replaceState(null, "", (next === "tr" ? "/tr" : "/") + window.location.search);
   }
 
   // Load the squad data up front (for the count, the stars' current clubs and
@@ -235,7 +242,7 @@ export default function App() {
       });
       const { players, total } = await Promise.race([loadPlayers(), timedOut]);
       setResult(computeResult(players, total, birthDate, famous));
-      if (push) window.history.pushState(null, "", resultPath(birthDate, famous));
+      if (push) window.history.pushState(null, "", basePath() + resultQuery(birthDate, famous));
       window.scrollTo(0, 0);
     } catch (err) {
       if (err.name === "AbortError") {
@@ -265,7 +272,7 @@ export default function App() {
     setResult(null);
     setDateFields(null);
     setError(null);
-    window.history.pushState(null, "", "/");
+    window.history.pushState(null, "", basePath());
   }
 
   // Turkish visitors see Arda Güler first.
@@ -279,7 +286,7 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <div className="wrap topbar-inner">
-          <a href="/" className="brand" onClick={e => { e.preventDefault(); handleReset(); }}>
+          <a href={basePath()} className="brand" onClick={e => { e.preventDefault(); handleReset(); }}>
             <BallIcon />
             <span>{t.brand}</span>
           </a>
@@ -348,7 +355,7 @@ export default function App() {
 
           <section className="league-strip" aria-label={t.leaguesLabel}>
             <div className="wrap league-strip-inner">
-              {LEAGUES.map(l => <span key={l}>{l}</span>)}
+              {LEAGUES.map(l => <a key={l} href={`/league/${slugify(l)}`}>{l}</a>)}
             </div>
           </section>
 
@@ -384,7 +391,8 @@ export default function App() {
             result={result}
             onReset={handleReset}
             t={t}
-            shareUrl={SITE_URL + resultPath(result.birthDate, result.famous) + (lang === "tr" ? "&l=tr" : "")}
+            // Shared links stay on "/" (the preview middleware matches it) and carry the language
+            shareUrl={`${SITE_URL}/${resultQuery(result.birthDate, result.famous)}${lang === "tr" ? "&l=tr" : ""}`}
           />
         </Suspense>
       )}
