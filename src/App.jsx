@@ -1,10 +1,33 @@
-import { useState, useEffect } from "react";
-import Results from "./components/Results";
+import { useState, useEffect, useEffectEvent, lazy, Suspense } from "react";
 import { translations } from "./i18n";
 import "./App.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 const USE_STATIC = import.meta.env.VITE_USE_STATIC !== "false";
+const SITE_URL   = "https://www.howmanyfootballplayersolderthanme.com";
+
+// Results pulls in recharts (~400 kB), so load it as its own chunk.
+const loadResults = () => import("./components/Results");
+const Results = lazy(loadResults);
+
+// Fetched once and shared by the hint count and every comparison.
+let playersPromise;
+function loadPlayers() {
+  if (!playersPromise) {
+    const url = USE_STATIC ? "/players.json" : `${API_URL}/api/players`;
+    playersPromise = fetch(url)
+      .then(r => {
+        if (!r.ok) throw new Error(`Server error: ${r.status}`);
+        return r.json();
+      })
+      .catch(err => { playersPromise = undefined; throw err; });
+  }
+  return playersPromise;
+}
+
+// "Kenan Yıldız" and "Kenan Yildiz" (as the data spells it) should match.
+const normalize = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ı/g, "i").toLowerCase();
+const slugify   = s => normalize(s).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 // First three letters give the standard short month in both languages (Jun / Haz).
 function formatBirth(birth, months) {
@@ -17,12 +40,13 @@ function daysInMonth(month, year) {
 }
 
 const YEAR_MS = 365.25 * 24 * 3600 * 1000;
+const DAY_MS  = 24 * 3600 * 1000;
 
 // `famous` is the famous player being compared, or undefined when it's the visitor.
 function computeResult(players, total, birthDate, famous) {
   const userDate = new Date(birthDate);
   const today    = new Date();
-  const isFamous = p => famous && p.name === famous.name && p.birth === famous.birth;
+  const isFamous = p => famous && p.birth === famous.birth && normalize(p.name) === normalize(famous.name);
 
   const olderPlayers = players
     .filter(p => new Date(p.birth) < userDate)
@@ -57,6 +81,14 @@ function computeResult(players, total, birthDate, famous) {
 
   const younger = players.filter(p => new Date(p.birth) > userDate).length;
 
+  // Closest birth date in either direction; `days` > 0 means the twin was born later.
+  let twin = null;
+  for (const p of players) {
+    if (isFamous(p)) continue;
+    const days = Math.round((new Date(p.birth) - userDate) / DAY_MS);
+    if (!twin || Math.abs(days) < Math.abs(twin.days)) twin = { ...p, days };
+  }
+
   return {
     older: olderPlayers.length,
     olderPlayers,
@@ -69,6 +101,8 @@ function computeResult(players, total, birthDate, famous) {
     ageDistribution,
     userAge: Math.floor((today - userDate) / YEAR_MS),
     younger,
+    twin,
+    birthDate,
     famous,
   };
 }
@@ -86,15 +120,39 @@ const FAMOUS_PLAYERS = [
   { name: "Neymar Jr",         birth: "1992-02-05", trFrom: "Neymar Jr'dan", photo: "https://img.a.transfermarkt.technology/portrait/medium/68290-1715683897.jpg" },
   { name: "Pedri",             birth: "2002-11-25", trFrom: "Pedri'den", photo: "https://img.a.transfermarkt.technology/portrait/medium/553919-1716198882.jpg" },
   { name: "Rodri",             birth: "1996-06-22", trFrom: "Rodri'den", photo: "https://img.a.transfermarkt.technology/portrait/medium/357905-1715683975.jpg" },
+  { name: "Arda Güler",        birth: "2005-02-25", trFrom: "Arda Güler'den", turkish: true },
+  { name: "Kenan Yıldız",      birth: "2005-05-04", trFrom: "Kenan Yıldız'dan", turkish: true },
+  { name: "Ferdi Kadıoğlu",    birth: "1999-10-07", trFrom: "Ferdi Kadıoğlu'ndan", turkish: true },
+  { name: "Barış Alper Yılmaz", birth: "2000-05-23", trFrom: "Barış Alper Yılmaz'dan", turkish: true },
 ];
+
+function isValidBirth(d) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
+  const [y, m, day] = d.split("-").map(Number);
+  return y >= 1940 && m >= 1 && m <= 12 && day >= 1 && day <= daysInMonth(m, y) && new Date(d) <= new Date();
+}
+
+// ?p=lionel-messi for a famous player, ?d=1995-03-14 for a birth date.
+function readUrl() {
+  const q = new URLSearchParams(window.location.search);
+  const famous = FAMOUS_PLAYERS.find(p => slugify(p.name) === q.get("p"));
+  if (famous) return { birthDate: famous.birth, famous };
+  const d = q.get("d");
+  return d && isValidBirth(d) ? { birthDate: d } : null;
+}
+
+const resultPath = (birthDate, famous) => famous ? `/?p=${slugify(famous.name)}` : `/?d=${birthDate}`;
 
 export default function App() {
   const currentYear = new Date().getFullYear();
-  const [day, setDay]       = useState("");
-  const [month, setMonth]   = useState("");
-  const [year, setYear]     = useState("");
+  // A shared link (?d= / ?p=) starts out filled in and loading.
+  const [initialTarget] = useState(readUrl);
+  const [initialY, initialM, initialD] = initialTarget ? initialTarget.birthDate.split("-") : [];
+  const [day, setDay]       = useState(initialD ? String(parseInt(initialD)) : "");
+  const [month, setMonth]   = useState(initialM ? String(parseInt(initialM)) : "");
+  const [year, setYear]     = useState(initialY || "");
   const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!!initialTarget);
   const [loadingSlow, setLoadingSlow] = useState(false);
   const [error, setError]   = useState(null);
   const [totalPlayers, setTotalPlayers] = useState("...");
@@ -122,29 +180,64 @@ export default function App() {
     localStorage.setItem("lang", next);
   }
 
-  // Fetch total count for the hint text
+  // Fetch total count for the hint text, and warm up the results chunk
   useEffect(() => {
-    fetch(USE_STATIC ? "/players.json" : `${API_URL}/api/status`)
-      .then(r => r.json())
+    (USE_STATIC ? loadPlayers() : fetch(`${API_URL}/api/status`).then(r => r.json()))
       .then(d => { if (d.total) setTotalPlayers(d.total); })
       .catch(() => {});
+    loadResults();
   }, []);
 
-  async function runComparison(birthDate, famous) {
+  function setDateFields(birthDate) {
+    const [y, m, d] = birthDate ? birthDate.split("-") : ["", "", ""];
+    setYear(y);
+    setMonth(m && String(parseInt(m)));
+    setDay(d && String(parseInt(d)));
+  }
+
+  // Back/forward: show whatever the address bar now asks for.
+  const onPopState = useEffectEvent(() => {
+    const target = readUrl();
+    if (target) {
+      runComparison(target.birthDate, target.famous, { push: false });
+    } else {
+      setResult(null);
+      setDateFields(null);
+      setError(null);
+    }
+  });
+
+  const finishInitial = useEffectEvent(() => {
+    if (initialTarget) finishComparison(initialTarget.birthDate, initialTarget.famous, { push: false });
+  });
+
+  useEffect(() => {
+    finishInitial();
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  function runComparison(birthDate, famous, options) {
+    setDateFields(birthDate);
     setLoading(true);
     setLoadingSlow(false);
     setError(null);
+    return finishComparison(birthDate, famous, options);
+  }
 
+  // The async half of a comparison; the caller has already set the loading state.
+  async function finishComparison(birthDate, famous, { push = true } = {}) {
     const slowTimer = setTimeout(() => setLoadingSlow(true), 5000);
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60000);
+    let timeout;
 
     try {
-      const url = USE_STATIC ? "/players.json" : `${API_URL}/api/players`;
-      const res = await fetch(url, { signal: controller.signal });
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
-      const { players, total } = await res.json();
+      const timedOut = new Promise((_, reject) => {
+        timeout = setTimeout(() => reject(Object.assign(new Error("timeout"), { name: "AbortError" })), 60000);
+      });
+      const { players, total } = await Promise.race([loadPlayers(), timedOut]);
       setResult(computeResult(players, total, birthDate, famous));
+      if (push) window.history.pushState(null, "", resultPath(birthDate, famous));
+      window.scrollTo(0, 0);
     } catch (err) {
       if (err.name === "AbortError") {
         setError(t.errorTimeout);
@@ -166,18 +259,20 @@ export default function App() {
   }
 
   function handleFamousPlayer(player) {
-    const [y, m, d] = player.birth.split("-");
-    setDay(String(parseInt(d)));
-    setMonth(String(parseInt(m)));
-    setYear(y);
     runComparison(player.birth, player);
   }
 
   function handleReset() {
     setResult(null);
-    setDay(""); setMonth(""); setYear("");
+    setDateFields(null);
     setError(null);
+    window.history.pushState(null, "", "/");
   }
+
+  // Turkish visitors see the Turkish players first.
+  const famousPlayers = lang === "tr"
+    ? [...FAMOUS_PLAYERS.filter(p => p.turkish), ...FAMOUS_PLAYERS.filter(p => !p.turkish)]
+    : FAMOUS_PLAYERS;
 
   return (
     <div className="app">
@@ -230,7 +325,7 @@ export default function App() {
           <div className="famous-section">
             <p className="famous-label">{t.orCompareFamous}</p>
             <div className="famous-grid">
-              {FAMOUS_PLAYERS.map(p => (
+              {famousPlayers.map(p => (
                 <button key={p.name} className="famous-card" onClick={() => handleFamousPlayer(p)} disabled={loading}>
                   <span className="famous-name">{p.name}</span>
                   <span className="famous-birth">🎂 {formatBirth(p.birth, t.months)}</span>
@@ -240,7 +335,14 @@ export default function App() {
           </div>
         </main>
       ) : (
-        <Results result={result} onReset={handleReset} t={t} />
+        <Suspense fallback={<main className="results" style={{ textAlign: "center", padding: 48 }}><span className="spinner" /></main>}>
+          <Results
+            result={result}
+            onReset={handleReset}
+            t={t}
+            shareUrl={SITE_URL + resultPath(result.birthDate, result.famous)}
+          />
+        </Suspense>
       )}
 
       <footer>

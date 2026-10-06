@@ -94,6 +94,9 @@ export const translations = {
       ageDistDesc: (total, age) => `Where you stand among all ${total} players — the green line marks your age (${age})`,
       marker: "You",
       olderCol: "Older than you",
+      twinTitle: "Your closest age twin",
+      twinSub: (days) => days === 0 ? "Born on the very same day as you! 🤝"
+        : `Born ${Math.abs(days)} day${Math.abs(days) === 1 ? "" : "s"} ${days > 0 ? "after" : "before"} you`,
     },
 
     them: ({ name }) => ({
@@ -114,6 +117,9 @@ export const translations = {
       ageDistDesc: (total, age) => `Where ${name} stands among all ${total} players — the green line marks ${name}'s age (${age})`,
       marker: name,
       olderCol: `Older than ${name}`,
+      twinTitle: `${name}'s closest age twin`,
+      twinSub: (days) => days === 0 ? `Born on the very same day as ${name}! 🤝`
+        : `Born ${Math.abs(days)} day${Math.abs(days) === 1 ? "" : "s"} ${days > 0 ? "after" : "before"} ${name}`,
     }),
   },
 
@@ -209,6 +215,9 @@ export const translations = {
       ageDistDesc: (total, age) => `Tüm ${total} futbolcu arasındaki yerin — yeşil çizgi senin yaşını (${age}) gösteriyor`,
       marker: "Sen",
       olderCol: "Senden Yaşlı",
+      twinTitle: "En yakın yaşıtın",
+      twinSub: (days) => days === 0 ? "Seninle aynı gün doğmuş! 🤝"
+        : `Senden ${Math.abs(days)} gün ${days > 0 ? "sonra" : "önce"} doğmuş`,
     },
 
     // Turkish suffixes depend on pronunciation, so the big label uses the
@@ -232,6 +241,9 @@ export const translations = {
       ageDistDesc: (total, age) => `${name}, tüm ${total} futbolcu arasında nerede? Yeşil çizgi onun yaşını (${age}) gösteriyor`,
       marker: name,
       olderCol: "Ondan Yaşlı",
+      twinTitle: "En yakın yaşıtı",
+      twinSub: (days) => days === 0 ? "Onunla aynı gün doğmuş! 🤝"
+        : `Ondan ${Math.abs(days)} gün ${days > 0 ? "sonra" : "önce"} doğmuş`,
     }),
   },
 };

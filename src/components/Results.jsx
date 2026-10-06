@@ -55,9 +55,8 @@ function playerAge(birth) {
   return age;
 }
 
-function ShareButtons({ older, total, famous, t }) {
+function ShareButtons({ older, total, famous, shareUrl, t }) {
   const shareText = t.shareText(older, total, famous);
-  const shareUrl  = "https://www.howmanyfootballplayersolderthanme.com";
   const fullText  = `${shareText} ${shareUrl}`;
 
   const twitterUrl  = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
@@ -88,8 +87,26 @@ function ShareButtons({ older, total, famous, t }) {
 // Language-independent sentinel so the "All" tab survives a language switch
 const ALL = "__all__";
 
-export default function Results({ result, onReset, t }) {
-  const { older, olderPlayers, sameBirthday, total, byLeague, topNationalities, ageDistribution, userAge, younger, famous } = result;
+function TwinCard({ twin, subject }) {
+  return (
+    <div className="twin-card">
+      <div className="twin-label">{subject.twinTitle}</div>
+      <div className="twin-name">
+        {twin.tmUrl
+          ? <a className="player-stats-link" href={twin.tmUrl} target="_blank" rel="noopener noreferrer">{twin.name}</a>
+          : twin.name}
+      </div>
+      <div className="twin-meta">
+        {twin.crest && <img src={twin.crest} alt="" className="club-logo" />}
+        <span>{twin.club} · {twin.league}</span>
+      </div>
+      <div className="twin-sub">{subject.twinSub(twin.days)}</div>
+    </div>
+  );
+}
+
+export default function Results({ result, onReset, t, shareUrl }) {
+  const { older, olderPlayers, sameBirthday, total, byLeague, topNationalities, ageDistribution, userAge, younger, twin, famous } = result;
   const subject = famous ? t.them(famous) : t.me;
   const pct = n => formatPct(n, total, t.decimalSep);
   const [leagueFilter, setLeagueFilter] = useState(ALL);
@@ -113,7 +130,9 @@ export default function Results({ result, onReset, t }) {
         <div className="big-sub">{t.outOf(total)}</div>
       </div>
 
-      <ShareButtons older={older} total={total} famous={famous} t={t} />
+      {twin && <TwinCard twin={twin} subject={subject} />}
+
+      <ShareButtons older={older} total={total} famous={famous} shareUrl={shareUrl} t={t} />
 
       {/* Stat cards */}
       <div className="stat-cards">
