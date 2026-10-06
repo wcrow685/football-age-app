@@ -48,6 +48,7 @@ The fetch scripts in `server/` pull squads from API-Sports and ESPN and enrich t
 After a refresh:
 
 1. Check for players listed at two clubs (stale transfers) and keep the current one.
-2. Update the player count in `index.html` meta tags if it changed.
-3. Regenerate the static share image: `npm i --no-save canvas && node server/generateOgImage.mjs`
-4. `npm run build` to check, then commit and push — Vercel redeploys.
+2. Restore Turkish/accented spellings (the APIs ASCII-fold many names): `python3 server/fetchTmNames.py /tmp/tm1.json` and `… --partial /tmp/tm2.json`, then `python3 server/applyTmNames.py /tmp/tm1.json /tmp/tm2.json` (dry run) and again with `--write`.
+3. Update the player count in `index.html` meta tags if it changed.
+4. Regenerate the static share image: `npm i --no-save canvas && node server/generateOgImage.mjs`
+5. `npm run build` to check, then commit and push — Vercel redeploys.

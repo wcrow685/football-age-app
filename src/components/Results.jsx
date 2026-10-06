@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { renderStoryCard, shareOrDownload } from "../storyCard";
 import { splitNames } from "../casing";
-import { isSamePlayer } from "../players";
+import { isSamePlayer, nameLang } from "../players";
 import ClubSelect from "./ClubSelect";
 
 // Uppercase headings in Turkish would turn "Messi" into "MESSİ"; mark the names
@@ -87,8 +87,7 @@ function TwinCard({ twin, subject, t }) {
       </div>
       <div className="twin-body">
         <span className="eyebrow">{subject.twinTitle}</span>
-        {/* Data names are ASCII-folded ("Yilmaz"), so Turkish uppercasing would give "YİLMAZ" */}
-        <span className="twin-name" lang="en"><PlayerName p={twin} /></span>
+        <span className="twin-name" lang={nameLang(twin)}><PlayerName p={twin} /></span>
         <span className="twin-meta">{twin.club} · {twin.league} · {subject.twinSub(twin.days)}</span>
       </div>
     </div>

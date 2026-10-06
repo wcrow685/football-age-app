@@ -1,6 +1,7 @@
 // Draws the 1080×1920 share card (Instagram/WhatsApp story) on a canvas.
 import { BALL_PATCHES, BALL_SEAMS } from "./ball";
 import { upperMixed } from "./casing";
+import { nameLang } from "./players";
 
 const W = 1080;
 const H = 1920;
@@ -177,8 +178,7 @@ export async function renderStoryCard({ older, younger, twin, t, subject, names 
     ctx.fillText(upper(subject.storyTwin), tx, cy + 80);
     setSpacing(ctx, 0);
     ctx.fillStyle = C.ink;
-    // Data names are ASCII-folded ("Yilmaz"), so uppercase them with English rules.
-    const name = twin.name.toLocaleUpperCase("en-US");
+    const name = twin.name.toLocaleUpperCase(nameLang(twin) === "tr" ? "tr-TR" : "en-US");
     fitFont(ctx, name, tw, 64, DISPLAY);
     ctx.fillText(name, tx, cy + 155);
     ctx.fillStyle = C.ink2;

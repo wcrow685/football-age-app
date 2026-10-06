@@ -58,6 +58,11 @@ export function clubsByLeague(players) {
     }));
 }
 
+// Language whose casing rules a name follows: Turkish names uppercase with
+// Turkish rules (KAHVECİ), everyone else with English ones (MESSI).
+export const nameLang = p => (p.nationality === "Türkiye" ? "tr" : "en");
+export const clubLang = league => (league === "Süper Lig" ? "tr" : "en");
+
 export const findFamous = slug => FAMOUS_PLAYERS.find(p => slugify(p.name) === slug);
 
 // Is data row `p` the famous player being compared?
