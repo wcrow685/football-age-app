@@ -405,6 +405,18 @@ button, select { font: inherit; }
   .squad-row { grid-template-columns: minmax(0, 1fr) 36px 84px; }
   .squad-row > :nth-child(2) { display: none; }
   .share-main { grid-column: 1 / -1; }
+  /* League filters: one swipeable row instead of a ragged wrap; the fade hints there's more */
+  .filter-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-inline: -16px;
+    padding-inline: 16px;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+  }
+  .filter-tabs::-webkit-scrollbar { display: none; }
+  .filter-tabs button { flex: none; white-space: nowrap; }
   /* Labels don't fit three across on a phone; the links keep their aria-label */
   .share-social-label { display: none; }
 }
