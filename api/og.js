@@ -73,14 +73,30 @@ export default async function handler(request) {
     ),
   );
 
-  return new ImageResponse(tree, {
-    width: 1200,
-    height: 630,
-    fonts: [
-      { name: "Anton", data: anton, weight: 400, style: "normal" },
-      { name: "Barlow Condensed", data: condensed, weight: 700, style: "normal" },
-      { name: "Barlow", data: barlow, weight: 500, style: "normal" },
-    ],
-    headers: { "cache-control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800" },
-  });
+  // Render fully before answering: ImageResponse streams, so a render error
+  // would otherwise reach WhatsApp & co. as an empty 200.
+  try {
+    const png = await new ImageResponse(tree, {
+      width: 1200,
+      height: 630,
+      fonts: [
+        { name: "Anton", data: anton, weight: 400, style: "normal" },
+        { name: "Barlow Condensed", data: condensed, weight: 700, style: "normal" },
+        { name: "Barlow", data: barlow, weight: 500, style: "normal" },
+      ],
+    }).arrayBuffer();
+    if (!png.byteLength) throw new Error("empty image");
+    return new Response(png, {
+      headers: {
+        "content-type": "image/png",
+        "cache-control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+      },
+    });
+  } catch (err) {
+    console.error("og render failed", err);
+    return new Response(null, {
+      status: 302,
+      headers: { location: new URL("/og-image.png", url).toString(), "x-og-error": String(err?.message || err).slice(0, 200) },
+    });
+  }
 }
