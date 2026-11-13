@@ -1,7 +1,6 @@
 import { useState, useEffect, useEffectEvent, useId, lazy, Suspense } from "react";
 import { translations } from "./i18n";
 import { BALL_PATCHES, BALL_SEAMS } from "./ball";
-import ClubSelect from "./components/ClubSelect";
 import { track } from "./analytics";
 import { normalize, slugify, daysInMonth, isValidBirth, FAMOUS_PLAYERS, findFamous, isSamePlayer, closestTwin, assignSlugs, clubsByLeague } from "./players";
 import "./App.css";
@@ -343,7 +342,7 @@ export default function App() {
               <form className="ticket" onSubmit={handleSubmit}>
                 <div className="ticket-head">
                   <span className="ticket-title">{t.ticketTitle}</span>
-                  <span className="ticket-stub">{t.ticketStub}</span>
+                  {t.ticketStub && <span className="ticket-stub">{t.ticketStub}</span>}
                 </div>
                 <div className="ticket-fields">
                   <label>
@@ -369,11 +368,6 @@ export default function App() {
                   </label>
                 </div>
 
-                <label className="ticket-team">
-                  {t.teamLabel}
-                  <ClubSelect clubs={clubs} value={team} onChange={changeTeam} noneLabel={t.teamNone} />
-                </label>
-
                 {error && <p className="error-msg" role="alert">{error}</p>}
 
                 <button type="submit" className="kickoff" disabled={loading}>
@@ -392,7 +386,7 @@ export default function App() {
           <section className="league-strip" aria-label={t.leaguesLabel}>
             <div className="wrap league-strip-inner">
               {/* Names keep English casing in Turkish (no "LİGUE"); Süper Lig is Turkish itself */}
-              {LEAGUES.map(l => <a key={l} href={`/league/${slugify(l)}`} lang={l === "Süper Lig" ? "tr" : "en"}>{l}</a>)}
+              {LEAGUES.map(l => <span key={l} lang={l === "Süper Lig" ? "tr" : "en"}>{l}</span>)}
             </div>
           </section>
 

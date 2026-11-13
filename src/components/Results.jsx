@@ -3,6 +3,8 @@ import { renderStoryCard, shareOrDownload } from "../storyCard";
 import { splitNames } from "../casing";
 import { isSamePlayer, nameLang } from "../players";
 import ClubSelect from "./ClubSelect";
+import PlayerCard from "./PlayerCard";
+import { buildCard } from "../playerCard";
 import { track } from "../analytics";
 
 // Uppercase headings in Turkish would turn "Messi" into "MESSİ"; mark the names
@@ -95,7 +97,15 @@ function TwinCard({ twin, subject, t }) {
   );
 }
 
-function SharePanel({ older, younger, total, twin, famous, birthDate, subject, shareUrl, t }) {
+// The visitor's card name is a per-browser convenience; storage may be unavailable.
+function savedCardName() {
+  try { return localStorage.getItem("cardName") || ""; } catch { return ""; }
+}
+function saveCardName(name) {
+  try { name ? localStorage.setItem("cardName", name) : localStorage.removeItem("cardName"); } catch { /* private mode */ }
+}
+
+function SharePanel({ card, older, younger, total, famous, birthDate, subject, shareUrl, t }) {
   const [copied, setCopied] = useState(false);
   const [drawing, setDrawing] = useState(false);
 
@@ -105,7 +115,7 @@ function SharePanel({ older, younger, total, twin, famous, birthDate, subject, s
     shared("story_card");
     setDrawing(true);
     try {
-      const blob = await renderStoryCard({ older, younger, twin, t, subject, names: famous ? [famous.trFrom, famous.name] : [] });
+      const blob = await renderStoryCard({ card, older, younger, t, subject, names: famous ? [famous.trFrom, famous.name] : [] });
       const name = famous ? famous.name.normalize("NFD").replace(/[^A-Za-z0-9]+/g, "-").toLowerCase() : birthDate;
       await shareOrDownload(blob, `older-than-me-${name}.png`, t.brand);
     } finally {
@@ -236,6 +246,8 @@ export default function Results({ result, onReset, t, shareUrl, team, clubs, onT
   const fmt = n => n.toLocaleString(t.locale);
   const pct = (n, digits) => formatPct(n, total, t.decimalSep, digits);
 
+  const [cardName, setCardName] = useState(savedCardName);
+  const card = buildCard(result, t, cardName);
   const [leagueFilter, setLeagueFilter] = useState(ALL);
   const [showAll, setShowAll] = useState(false);
 
@@ -254,13 +266,30 @@ export default function Results({ result, onReset, t, shareUrl, team, clubs, onT
 
       <Scoreboard older={older} younger={younger} total={total} subject={subject} names={names} t={t} fmt={fmt} pct={pct} />
 
-      <div className="grid-2">
-        {twin && <TwinCard twin={twin} subject={subject} t={t} />}
-        <SharePanel
-          older={older} younger={younger} total={total} twin={twin} famous={famous}
-          birthDate={birthDate} subject={subject} shareUrl={shareUrl} t={t}
-        />
-      </div>
+      <section className="card-row" aria-label={t.card.title}>
+        <PlayerCard card={card} t={t} />
+        <div className="card-side">
+          {!famous && (
+            <label className="card-name-field">
+              <span className="eyebrow">{t.card.nameLabel}</span>
+              <input
+                type="text"
+                value={cardName}
+                maxLength={14}
+                placeholder={t.card.namePlaceholder}
+                autoComplete="given-name"
+                onChange={e => { setCardName(e.target.value); saveCardName(e.target.value.trim()); }}
+              />
+            </label>
+          )}
+          <p className="card-help">{t.card.help}</p>
+          {twin && <TwinCard twin={twin} subject={subject} t={t} />}
+          <SharePanel
+            card={card} older={older} younger={younger} total={total} famous={famous}
+            birthDate={birthDate} subject={subject} shareUrl={shareUrl} t={t}
+          />
+        </div>
+      </section>
 
       <TeamPanel
         team={team} clubs={clubs} onTeamChange={onTeamChange} players={players}

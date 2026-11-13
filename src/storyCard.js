@@ -1,7 +1,6 @@
-// Draws the 1080×1920 share card (Instagram/WhatsApp story) on a canvas.
+// Draws the 1080×1920 share image (Instagram/WhatsApp story): the player card plus the scoreline.
 import { BALL_PATCHES, BALL_SEAMS } from "./ball";
 import { upperMixed } from "./casing";
-import { nameLang } from "./players";
 
 const W = 1080;
 const H = 1920;
@@ -50,11 +49,6 @@ function wrapCentered(ctx, text, x, y, maxWidth, lineHeight) {
   return y + lineHeight;
 }
 
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, h, r);
-}
-
 function drawBall(ctx, x, y, size) {
   ctx.save();
   ctx.translate(x, y);
@@ -87,32 +81,124 @@ async function loadFonts() {
   ]).catch(() => {});
 }
 
+// The card's shield outline (same polygon as .pcard in App.css), scaled to w×h at x,y.
+function shieldPath(ctx, x, y, w, h) {
+  const pts = [[0.5, 0], [1, 0.07], [1, 0.84], [0.5, 1], [0, 0.84], [0, 0.07]];
+  ctx.beginPath();
+  pts.forEach(([px, py], i) => (i ? ctx.lineTo(x + px * w, y + py * h) : ctx.moveTo(x + px * w, y + py * h)));
+  ctx.closePath();
+}
+
+function drawPlayerCard(ctx, card, t, x, y, w, h) {
+  const s = w / 320; // the on-page card is 320 px wide
+  const { colors } = card;
+
+  ctx.save();
+  ctx.shadowColor = "rgba(0,0,0,0.45)";
+  ctx.shadowBlur = 60;
+  ctx.shadowOffsetY = 30;
+  shieldPath(ctx, x, y, w, h);
+  ctx.fillStyle = colors.rim;
+  ctx.fill();
+  ctx.restore();
+
+  const i = 5 * s;
+  const face = ctx.createLinearGradient(x, y, x + w * 0.36, y + h);
+  face.addColorStop(0, colors.light);
+  face.addColorStop(0.55, colors.base);
+  face.addColorStop(1, colors.deep);
+  shieldPath(ctx, x + i, y + i, w - 2 * i, h - 2 * i);
+  ctx.fillStyle = face;
+  ctx.fill();
+
+  const ink = colors.ink;
+  const top = y + 36 * s;
+  const left = x + 26 * s;
+  const right = x + w - 26 * s;
+  ctx.fillStyle = ink;
+  ctx.strokeStyle = ink;
+  ctx.textAlign = "center";
+
+  // Rating column: age and position
+  const rx = left + 34 * s;
+  ctx.font = `${62 * s}px ${DISPLAY}`;
+  ctx.fillText(String(card.age), rx, top + 52 * s);
+  ctx.font = `700 ${21 * s}px ${LABEL}`;
+  ctx.fillText(card.pos, rx, top + 78 * s);
+
+  // Portrait circle: initial, or the ball when no name was given
+  const pr = 69 * s;
+  const pcx = right - pr;
+  const pcy = top + pr;
+  ctx.lineWidth = 3 * s;
+  ctx.beginPath();
+  ctx.arc(pcx, pcy, pr - 1.5 * s, 0, Math.PI * 2);
+  ctx.stroke();
+  if (card.initial) {
+    ctx.font = `${74 * s}px ${DISPLAY}`;
+    ctx.fillText(card.initial.toLocaleUpperCase(card.nameLang === "tr" ? "tr-TR" : "en-US"), pcx, pcy + 27 * s);
+  } else {
+    drawBall(ctx, pcx - 32 * s, pcy - 32 * s, 64 * s);
+  }
+
+  // Name and divider
+  const nameY = top + 138 * s + 44 * s;
+  const name = card.name.toLocaleUpperCase(card.nameLang === "tr" ? "tr-TR" : "en-US");
+  ctx.fillStyle = ink;
+  fitFont(ctx, name, w - 70 * s, 32 * s, DISPLAY);
+  ctx.fillText(name, x + w / 2, nameY);
+  ctx.globalAlpha = 0.35;
+  ctx.fillRect(left, nameY + 10 * s, right - left, 2 * s);
+  ctx.globalAlpha = 1;
+
+  // Stats: value right-aligned, key after it, two columns
+  const colW = (right - left - 18 * s) / 2;
+  card.stats.forEach((st, k) => {
+    const cx = left + (k % 2) * (colW + 18 * s);
+    const cy = nameY + 42 * s + Math.floor(k / 2) * 27 * s;
+    ctx.textAlign = "right";
+    ctx.font = `${21 * s}px ${DISPLAY}`;
+    ctx.fillText(st.v, cx + 52 * s, cy);
+    ctx.textAlign = "left";
+    ctx.font = `700 ${19 * s}px ${LABEL}`;
+    ctx.fillText(st.k, cx + 60 * s, cy);
+  });
+
+  ctx.textAlign = "center";
+  ctx.globalAlpha = 0.8;
+  ctx.font = `700 ${12 * s}px ${LABEL}`;
+  setSpacing(ctx, 2 * s);
+  ctx.fillText(t.card.footer(card.stageLabel).toLocaleUpperCase(t.locale), x + w / 2, nameY + 42 * s + 2 * 27 * s + 34 * s);
+  setSpacing(ctx, 0);
+  ctx.globalAlpha = 1;
+}
+
 /**
  * @param {object} p
+ * @param {object} p.card     buildCard() output
  * @param {number} p.older    players older than the subject
  * @param {number} p.younger  players younger than the subject
- * @param {object|null} p.twin closest-age player ({ name, club, league, days })
  * @param {object} p.t        translations for the current language
  * @param {object} p.subject  t.me or t.them(famous)
  * @param {string[]} [p.names] the famous player's name forms, uppercased with English rules
  * @returns {Promise<Blob>}
  */
-export async function renderStoryCard({ older, younger, twin, t, subject, names = [] }) {
+export async function renderStoryCard({ card, older, younger, t, subject, names = [] }) {
   await loadFonts();
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d");
   const fmt = n => n.toLocaleString(t.locale);
-  const upper = s => upperMixed(s, names, t.locale);
+  const upper = str => upperMixed(str, names, t.locale);
 
   // Ground and pitch markings
   ctx.fillStyle = C.pitch;
   ctx.fillRect(0, 0, W, H);
   ctx.strokeStyle = C.ghost;
   ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2); ctx.stroke();
-  ctx.beginPath(); ctx.arc(W / 2, H / 2, 360, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, 760); ctx.lineTo(W, 760); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W / 2, 760, 360, 0, Math.PI * 2); ctx.stroke();
 
   // Top row
   ctx.textBaseline = "alphabetic";
@@ -120,82 +206,41 @@ export async function renderStoryCard({ older, younger, twin, t, subject, names 
   setSpacing(ctx, 5);
   ctx.textAlign = "left";
   ctx.fillStyle = C.muted;
-  ctx.fillText(upper(t.storyTop), PAD, 172);
+  ctx.fillText(upper(t.storyTop), PAD, 140);
   ctx.textAlign = "right";
   ctx.fillStyle = C.accent;
-  ctx.fillText("2026–27", W - PAD, 172);
+  ctx.fillText("2026–27", W - PAD, 140);
   setSpacing(ctx, 0);
 
-  // Scoreboard
-  const bx = 160, by = 420, bw = W - 320, bh = 600;
-  roundRect(ctx, bx, by, bw, bh, 16);
-  ctx.fillStyle = C.board;
-  ctx.fill();
-  ctx.strokeStyle = C.lineSoft;
-  ctx.lineWidth = 4;
-  ctx.stroke();
+  // The player card
+  const cw = 680, chh = Math.round(cw * 472 / 320);
+  drawPlayerCard(ctx, card, t, (W - cw) / 2, 210, cw, chh);
 
+  // Scoreline under the card
+  const sy = 210 + chh + 130;
   ctx.textAlign = "center";
   ctx.fillStyle = C.accent;
-  fitFont(ctx, fmt(older), bw - 80, 360, DISPLAY);
-  ctx.fillText(fmt(older), W / 2, by + 380);
-
+  ctx.font = `150px ${DISPLAY}`;
+  ctx.fillText(fmt(older), W / 2, sy);
   ctx.fillStyle = C.chalk;
-  ctx.font = `700 46px ${LABEL}`;
+  ctx.font = `700 44px ${LABEL}`;
   setSpacing(ctx, 4);
-  wrapCentered(ctx, upper(subject.storyOlder), W / 2, by + 480, bw - 80, 56);
+  wrapCentered(ctx, upper(subject.storyOlder), W / 2, sy + 62, W - 2 * PAD, 52);
   setSpacing(ctx, 0);
-
-  // "…and I'm older than N of them."
   ctx.fillStyle = C.text;
-  ctx.font = `500 46px ${BODY}`;
-  wrapCentered(ctx, subject.storyYounger(fmt(younger)), W / 2, by + bh + 110, W - 2 * PAD - 80, 60);
-
-  // Age twin
-  if (twin) {
-    const cx = PAD, cy = 1330, cw = W - 2 * PAD, ch = 260;
-    roundRect(ctx, cx, cy, cw, ch, 12);
-    ctx.fillStyle = C.chalk;
-    ctx.fill();
-
-    roundRect(ctx, cx + 40, cy + 40, 150, 180, 8);
-    ctx.strokeStyle = C.ink;
-    ctx.lineWidth = 4;
-    ctx.stroke();
-    const sign = twin.days > 0 ? "+" : twin.days < 0 ? "−" : "";
-    ctx.fillStyle = C.ink;
-    ctx.textAlign = "center";
-    fitFont(ctx, `${sign}${Math.abs(twin.days)}`, 130, 72, DISPLAY);
-    ctx.fillText(`${sign}${Math.abs(twin.days)}`, cx + 115, cy + 145);
-    ctx.font = `700 26px ${LABEL}`;
-    setSpacing(ctx, 3);
-    ctx.fillText(upper(t.daysLabel(Math.abs(twin.days))), cx + 115, cy + 190);
-
-    const tx = cx + 230, tw = cw - 270;
-    ctx.textAlign = "left";
-    ctx.fillStyle = C.inkMuted;
-    ctx.font = `700 28px ${LABEL}`;
-    ctx.fillText(upper(subject.storyTwin), tx, cy + 80);
-    setSpacing(ctx, 0);
-    ctx.fillStyle = C.ink;
-    const name = twin.name.toLocaleUpperCase(nameLang(twin) === "tr" ? "tr-TR" : "en-US");
-    fitFont(ctx, name, tw, 64, DISPLAY);
-    ctx.fillText(name, tx, cy + 155);
-    ctx.fillStyle = C.ink2;
-    fitFont(ctx, `${twin.club} · ${twin.league}`, tw, 30, BODY, "500");
-    ctx.fillText(`${twin.club} · ${twin.league}`, tx, cy + 205);
-  }
+  ctx.font = `500 40px ${BODY}`;
+  wrapCentered(ctx, subject.storyYounger(fmt(younger)), W / 2, sy + 136, W - 2 * PAD, 52);
 
   // Footer
-  drawBall(ctx, W / 2 - 40, 1650, 80);
+  drawBall(ctx, W / 2 - 34, 1700, 68);
   ctx.textAlign = "center";
-  ctx.font = `700 32px ${LABEL}`;
+  ctx.font = `700 30px ${LABEL}`;
   setSpacing(ctx, 3);
   ctx.fillStyle = C.muted;
-  ctx.fillText(upper(t.storyCta), W / 2, 1800);
+  ctx.fillText(upper(t.storyCta), W / 2, 1822);
   ctx.fillStyle = C.chalk;
-  fitFont(ctx, "HOWMANYFOOTBALLPLAYERSOLDERTHANME.COM", W - 2 * PAD, 32, LABEL, "700");
-  ctx.fillText("HOWMANYFOOTBALLPLAYERSOLDERTHANME.COM", W / 2, 1848);
+  fitFont(ctx, "HOWMANYFOOTBALLPLAYERSOLDERTHANME.COM", W - 2 * PAD, 30, LABEL, "700");
+  ctx.fillText("HOWMANYFOOTBALLPLAYERSOLDERTHANME.COM", W / 2, 1866);
   setSpacing(ctx, 0);
 
   return new Promise((resolve, reject) =>
