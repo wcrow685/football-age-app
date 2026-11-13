@@ -119,16 +119,12 @@ function drawPlayerCard(ctx, card, t, x, y, w, h) {
   ctx.strokeStyle = ink;
   ctx.textAlign = "center";
 
-  // Rating column: age, position, rule, ball
+  // Rating column: age and position
   const rx = left + 34 * s;
   ctx.font = `${62 * s}px ${DISPLAY}`;
   ctx.fillText(String(card.age), rx, top + 52 * s);
   ctx.font = `700 ${21 * s}px ${LABEL}`;
   ctx.fillText(card.pos, rx, top + 78 * s);
-  ctx.globalAlpha = 0.4;
-  ctx.fillRect(rx - 15 * s, top + 88 * s, 30 * s, 2 * s);
-  ctx.globalAlpha = 1;
-  drawBall(ctx, rx - 14 * s, top + 96 * s, 28 * s);
 
   // Portrait circle: initial, or the ball when no name was given
   const pr = 69 * s;

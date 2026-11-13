@@ -414,7 +414,6 @@ button, select { font: inherit; }
 .pcard-rating { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .pcard-age { font-family: var(--display); font-size: 62px; line-height: 0.9; }
 .pcard-pos { font-family: var(--label); font-weight: 700; font-size: 21px; letter-spacing: 0.06em; }
-.pcard-rule { width: 30px; height: 2px; background: currentColor; opacity: 0.4; margin: 5px 0; }
 .pcard-portrait {
   width: 138px; height: 138px; border-radius: 50%; border: 3px solid currentColor;
   display: flex; align-items: center; justify-content: center;

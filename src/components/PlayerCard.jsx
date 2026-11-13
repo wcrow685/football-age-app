@@ -33,8 +33,6 @@ export default function PlayerCard({ card, t }) {
           <div className="pcard-rating">
             <span className="pcard-age">{card.age}</span>
             <span className="pcard-pos">{card.pos}</span>
-            <span className="pcard-rule" />
-            <Ball size={28} />
           </div>
           <div className="pcard-portrait" aria-hidden="true">
             {card.initial ? <span lang={card.nameLang}>{card.initial}</span> : <Ball size={64} />}
