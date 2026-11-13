@@ -342,7 +342,7 @@ export default function App() {
               <form className="ticket" onSubmit={handleSubmit}>
                 <div className="ticket-head">
                   <span className="ticket-title">{t.ticketTitle}</span>
-                  <span className="ticket-stub">{t.ticketStub}</span>
+                  {t.ticketStub && <span className="ticket-stub">{t.ticketStub}</span>}
                 </div>
                 <div className="ticket-fields">
                   <label>
