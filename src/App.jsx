@@ -386,7 +386,7 @@ export default function App() {
           <section className="league-strip" aria-label={t.leaguesLabel}>
             <div className="wrap league-strip-inner">
               {/* Names keep English casing in Turkish (no "LİGUE"); Süper Lig is Turkish itself */}
-              {LEAGUES.map(l => <a key={l} href={`/league/${slugify(l)}`} lang={l === "Süper Lig" ? "tr" : "en"}>{l}</a>)}
+              {LEAGUES.map(l => <span key={l} lang={l === "Süper Lig" ? "tr" : "en"}>{l}</span>)}
             </div>
           </section>
 
