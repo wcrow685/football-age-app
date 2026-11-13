@@ -19,7 +19,7 @@ export const FAMOUS_PLAYERS = [
   { name: "Cristiano Ronaldo", birth: "1985-02-05", trFrom: "Cristiano Ronaldo'dan" },
   { name: "Kylian Mbappé",     birth: "1998-12-20", trFrom: "Kylian Mbappé'den" },
   { name: "Erling Haaland",    birth: "2000-07-21", trFrom: "Erling Haaland'dan" },
-  { name: "Vinicius Junior",   birth: "2000-07-12", trFrom: "Vinicius Junior'dan" },
+  { name: "Vinicius Junior",   birth: "2000-07-12", trFrom: "Vinicius Junior'dan", cardName: "Vinícius" },
   { name: "Jude Bellingham",   birth: "2003-06-29", trFrom: "Jude Bellingham'dan" },
   { name: "Mohamed Salah",     birth: "1992-06-15", trFrom: "Mohamed Salah'tan" },
   { name: "Lamine Yamal",      birth: "2007-07-13", trFrom: "Lamine Yamal'dan" },

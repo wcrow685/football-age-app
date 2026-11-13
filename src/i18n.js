@@ -6,6 +6,18 @@ export const translations = {
     locale: "en-US",
     decimalSep: ".",
     percent: (v) => `${v}%`,
+    card: {
+      title: "Your player card",
+      nameLabel: "Name on your card (optional)",
+      namePlaceholder: "YOU",
+      you: "You",
+      footer: (stage) => `${stage} · 2026–27`,
+      dayShort: "d",
+      positions: { Goalkeeper: "GK", Defender: "DF", Midfielder: "MF", Forward: "FW" },
+      stats: { top: "TOP", older: "OLD", younger: "YNG", twin: "TWN", bday: "BDY", league: "LGE" },
+      stages: { young: "Young talent", rising: "Rising", prime: "Prime", experienced: "Experienced", veteran: "Veteran", legend: "Legend" },
+      help: "Number = age · colour = career stage · position = your closest-age player's",
+    },
     months: ["January","February","March","April","May","June","July","August","September","October","November","December"],
 
     // Header
@@ -131,6 +143,18 @@ export const translations = {
     locale: "tr-TR",
     decimalSep: ",",
     percent: (v) => `%${v}`,
+    card: {
+      title: "Oyuncu kartın",
+      nameLabel: "Karttaki ismin (isteğe bağlı)",
+      namePlaceholder: "SEN",
+      you: "Sen",
+      footer: (stage) => `${stage} · 2026–27`,
+      dayShort: "g",
+      positions: { Goalkeeper: "KL", Defender: "DF", Midfielder: "OS", Forward: "FV" },
+      stats: { top: "ÜST", older: "YŞL", younger: "GNÇ", twin: "İKZ", bday: "DGN", league: "LİG" },
+      stages: { young: "Genç yetenek", rising: "Yükselen", prime: "Zirve", experienced: "Tecrübeli", veteran: "Veteran", legend: "Efsane" },
+      help: "Sayı = yaşın · renk = kariyer evresi · mevki = en yakın yaşıtının mevkii",
+    },
     months: ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"],
 
     // Header

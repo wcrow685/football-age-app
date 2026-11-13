@@ -1,7 +1,6 @@
 import { useState, useEffect, useEffectEvent, useId, lazy, Suspense } from "react";
 import { translations } from "./i18n";
 import { BALL_PATCHES, BALL_SEAMS } from "./ball";
-import ClubSelect from "./components/ClubSelect";
 import { track } from "./analytics";
 import { normalize, slugify, daysInMonth, isValidBirth, FAMOUS_PLAYERS, findFamous, isSamePlayer, closestTwin, assignSlugs, clubsByLeague } from "./players";
 import "./App.css";
@@ -368,11 +367,6 @@ export default function App() {
                     </select>
                   </label>
                 </div>
-
-                <label className="ticket-team">
-                  {t.teamLabel}
-                  <ClubSelect clubs={clubs} value={team} onChange={changeTeam} noneLabel={t.teamNone} />
-                </label>
 
                 {error && <p className="error-msg" role="alert">{error}</p>}
 
